@@ -468,7 +468,7 @@
 
       <div class="crosshair" aria-hidden="true"></div>
       <div class="toast panel" id="toast"></div>
-      <div class="hint">WASD/矢印: 移動 ・ Shift: ダッシュ ・ マウス: 視点/照準 ・ クリック/Space: 射撃 ・ R: リロード</div>
+      <div class="hint">WASD/矢印: 移動 ・ Shift: ダッシュ ・ 左Alt: ドッジロール ・ 右クリック: エイム ・ クリック/Space: 射撃 ・ R: リロード</div>
     </div>
 
     <div class="touch" aria-hidden="true">
@@ -552,7 +552,7 @@
       const clock = new THREE.Clock();
       const raycaster = new THREE.Raycaster();
       const keys = new Set();
-      const pointer = { locked: false, yaw: 0, pitch: -0.08, firing: false };
+      const pointer = { locked: false, yaw: 0, pitch: -0.08, firing: false, aiming: false };
       const touch = { x: 0, y: 0, active: false, firing: false, dash: false, aim: false };
       const world = { half: 62 };
       const state = {
@@ -576,6 +576,13 @@
         fireDelay: 0,
         stamina: 100,
         staminaExhausted: false,
+        rollTime: 0,
+        rollDuration: 0.54,
+        rollCooldown: 0,
+        rollDir: new THREE.Vector3(0, 0, -1),
+        model: null,
+        parts: {},
+        noise: 0,
         cores: 0,
         kills: 0
       };
@@ -586,6 +593,9 @@
         crate: new THREE.MeshStandardMaterial({ color: 0x5b5138, roughness: 0.84 }),
         wreck: new THREE.MeshStandardMaterial({ color: 0x2f3b3c, roughness: 0.72, metalness: 0.25 }),
         player: new THREE.MeshStandardMaterial({ color: 0xe8e0ce, roughness: 0.5, metalness: 0.2 }),
+        suit: new THREE.MeshStandardMaterial({ color: 0x364145, roughness: 0.64, metalness: 0.12 }),
+        cloth: new THREE.MeshStandardMaterial({ color: 0x8a7b56, roughness: 0.72, metalness: 0.04 }),
+        skin: new THREE.MeshStandardMaterial({ color: 0xb98f72, roughness: 0.68 }),
         visor: new THREE.MeshStandardMaterial({ color: 0x63c9dc, roughness: 0.2, metalness: 0.2, emissive: 0x123a42 }),
         drone: new THREE.MeshStandardMaterial({ color: 0x60491e, roughness: 0.42, metalness: 0.35, emissive: 0x241600 }),
         hunter: new THREE.MeshStandardMaterial({ color: 0x224f58, roughness: 0.32, metalness: 0.42, emissive: 0x09262c }),
@@ -593,6 +603,9 @@
         med: new THREE.MeshStandardMaterial({ color: 0x7bc878, roughness: 0.5, emissive: 0x123f18 }),
         ammo: new THREE.MeshStandardMaterial({ color: 0xd8b258, roughness: 0.42, emissive: 0x3c2a08 }),
         bullet: new THREE.MeshBasicMaterial({ color: 0xffe095 }),
+        bulletTrail: new THREE.MeshBasicMaterial({ color: 0xffd06a, transparent: true, opacity: 0.82, depthWrite: false }),
+        enemyBullet: new THREE.MeshBasicMaterial({ color: 0xe45c52 }),
+        enemyTrail: new THREE.MeshBasicMaterial({ color: 0xe45c52, transparent: true, opacity: 0.42, depthWrite: false }),
         red: new THREE.MeshBasicMaterial({ color: 0xe45c52 }),
         beacon: new THREE.MeshStandardMaterial({ color: 0x63c9dc, roughness: 0.2, metalness: 0.25, emissive: 0x155664 })
       };
@@ -600,6 +613,7 @@
       const obstacles = [];
       const enemies = [];
       const bullets = [];
+      const enemyBullets = [];
       const pickups = [];
       const particles = [];
       const tempVec = new THREE.Vector3();
@@ -689,24 +703,64 @@
       }
 
       function buildPlayer() {
-        const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.75, 1.15, 6, 12), mats.player);
-        body.position.y = 1.25;
-        body.castShadow = true;
-        player.group.add(body);
+        const model = new THREE.Group();
+        player.model = model;
+        player.group.add(model);
 
-        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.22, 0.1), mats.visor);
-        visor.position.set(0, 1.76, -0.63);
-        player.group.add(visor);
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.25, 0.48), mats.suit);
+        torso.position.y = 1.48;
+        torso.castShadow = true;
+        model.add(torso);
 
-        const pack = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.98, 0.32), mats.wreck);
-        pack.position.set(0, 1.18, 0.72);
+        const chest = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.58, 0.54), mats.player);
+        chest.position.set(0, 1.64, -0.03);
+        chest.castShadow = true;
+        model.add(chest);
+
+        const head = new THREE.Mesh(new THREE.CapsuleGeometry(0.34, 0.18, 5, 12), mats.skin);
+        head.position.y = 2.36;
+        head.castShadow = true;
+        model.add(head);
+
+        const helmet = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.38, 0.5), mats.suit);
+        helmet.position.set(0, 2.42, -0.02);
+        helmet.castShadow = true;
+        model.add(helmet);
+
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.15, 0.08), mats.visor);
+        visor.position.set(0, 2.43, -0.29);
+        model.add(visor);
+
+        const pack = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.9, 0.32), mats.wreck);
+        pack.position.set(0, 1.45, 0.43);
         pack.castShadow = true;
-        player.group.add(pack);
+        model.add(pack);
 
-        const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 1.35), mats.ammo);
-        rifle.position.set(0.62, 1.2, -0.7);
+        const rifle = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 1.38), mats.ammo);
+        rifle.position.set(0.58, 1.45, -0.74);
+        rifle.rotation.x = -0.05;
         rifle.castShadow = true;
-        player.group.add(rifle);
+        model.add(rifle);
+
+        const makeLimb = (name, x, y, z, w, h, d, mat) => {
+          const pivot = new THREE.Group();
+          pivot.position.set(x, y, z);
+          const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+          mesh.position.y = -h / 2;
+          mesh.castShadow = true;
+          pivot.add(mesh);
+          model.add(pivot);
+          player.parts[name] = pivot;
+          return pivot;
+        };
+
+        makeLimb("leftArm", -0.72, 1.92, -0.04, 0.24, 0.95, 0.24, mats.cloth);
+        makeLimb("rightArm", 0.72, 1.92, -0.04, 0.24, 0.95, 0.24, mats.cloth);
+        makeLimb("leftLeg", -0.28, 0.92, 0.02, 0.28, 0.98, 0.28, mats.suit);
+        makeLimb("rightLeg", 0.28, 0.92, 0.02, 0.28, 0.98, 0.28, mats.suit);
+        player.parts.torso = torso;
+        player.parts.head = head;
+        player.parts.rifle = rifle;
 
         player.group.position.set(-48, 0, 48);
         scene.add(player.group);
@@ -715,9 +769,12 @@
       function seedRaid() {
         for (const item of pickups) scene.remove(item.mesh);
         for (const enemy of enemies) scene.remove(enemy.group);
+        for (const bullet of bullets) scene.remove(bullet.mesh);
+        for (const bullet of enemyBullets) scene.remove(bullet.mesh);
         pickups.length = 0;
         enemies.length = 0;
         bullets.length = 0;
+        enemyBullets.length = 0;
         particles.length = 0;
 
         const coreSpots = [
@@ -778,10 +835,15 @@
           group,
           hp: hunter ? 85 : 46,
           maxHp: hunter ? 85 : 46,
-          speed: hunter ? 7.8 : 5.8,
+          speed: hunter ? 7.2 : 4.6,
           radius: hunter ? 1.35 : 1.1,
           cooldown: rand(0.5, 1.4),
           type: hunter ? "hunter" : "scout",
+          state: "idle",
+          alertTimer: 0,
+          investigatePoint: new THREE.Vector3(x, 0, z),
+          patrolAngle: rand(0, Math.PI * 2),
+          shootCooldown: rand(1.2, 2.8),
           bob: rand(0, Math.PI * 2)
         });
       }
@@ -797,9 +859,13 @@
           fireDelay: 0,
           stamina: 100,
           staminaExhausted: false,
+          rollTime: 0,
+          rollCooldown: 0,
+          noise: 0,
           cores: 0,
           kills: 0
         });
+        pointer.aiming = false;
         player.group.position.set(-48, 0, 48);
         player.velocity.set(0, 0, 0);
         seedRaid();
@@ -826,6 +892,7 @@
 
         updatePlayer(dt);
         updateBullets(dt);
+        updateEnemyBullets(dt);
         updateEnemies(dt);
         updatePickups();
         updateParticles(dt);
@@ -847,6 +914,46 @@
       }
 
       function updatePlayer(dt) {
+        player.rollCooldown = Math.max(0, player.rollCooldown - dt);
+        if (player.stamina <= 0) player.staminaExhausted = true;
+        if (player.stamina >= 28) player.staminaExhausted = false;
+
+        if (player.rollTime > 0) {
+          player.rollTime = Math.max(0, player.rollTime - dt);
+          movePlayer(player.rollDir, 18.5 * dt);
+          player.group.rotation.y = lerpAngle(player.group.rotation.y, Math.atan2(player.rollDir.x, player.rollDir.z), 18 * dt);
+          animatePlayer(dt, 0, false, true);
+          player.noise = 0;
+          return;
+        }
+
+        const move = currentMoveDirection();
+
+        const wantsDash = keys.has("shift") || touch.dash;
+        const dashing = wantsDash && !player.staminaExhausted && player.stamina > 0 && move.lengthSq() > 0;
+        const speed = dashing ? 13.5 : 8.2;
+        if (dashing) {
+          player.stamina = Math.max(0, player.stamina - dt * 34);
+        } else {
+          player.stamina = Math.min(100, player.stamina + dt * 22);
+        }
+        player.noise = dashing ? 30 : 0;
+
+        movePlayer(move, speed * dt);
+
+        if (move.lengthSq() > 0.01) {
+          const targetYaw = Math.atan2(move.x, move.z);
+          player.group.rotation.y = lerpAngle(player.group.rotation.y, targetYaw, 12 * dt);
+        } else {
+          player.group.rotation.y = lerpAngle(player.group.rotation.y, pointer.yaw + Math.PI, 7 * dt);
+        }
+        animatePlayer(dt, move.length(), dashing, false);
+
+        if ((pointer.firing || keys.has(" ") || touch.firing) && player.reload <= 0) shoot();
+        if (player.ammo === 0 && player.reserve > 0) reload();
+      }
+
+      function currentMoveDirection() {
         const forward = new THREE.Vector3(Math.sin(pointer.yaw), 0, Math.cos(pointer.yaw) * -1);
         const right = new THREE.Vector3(Math.cos(pointer.yaw), 0, Math.sin(pointer.yaw));
         let mx = 0;
@@ -862,34 +969,48 @@
         move.addScaledVector(forward, mz);
         move.addScaledVector(right, mx);
         if (move.lengthSq() > 0.01) move.normalize();
+        return move;
+      }
 
-        if (player.stamina <= 0) player.staminaExhausted = true;
-        if (player.stamina >= 28) player.staminaExhausted = false;
-
-        const wantsDash = keys.has("shift") || touch.dash;
-        const dashing = wantsDash && !player.staminaExhausted && player.stamina > 0 && move.lengthSq() > 0;
-        const speed = dashing ? 13.5 : 8.2;
-        if (dashing) {
-          player.stamina = Math.max(0, player.stamina - dt * 34);
-        } else {
-          player.stamina = Math.min(100, player.stamina + dt * 22);
-        }
-
-        const next = player.group.position.clone().addScaledVector(move, speed * dt);
+      function movePlayer(direction, distance) {
+        if (direction.lengthSq() <= 0.001 || distance <= 0) return;
+        const next = player.group.position.clone().addScaledVector(direction, distance);
         next.x = clamp(next.x, -world.half + 2, world.half - 2);
         next.z = clamp(next.z, -world.half + 2, world.half - 2);
         resolveWorldCollision(next, 1.15);
         player.group.position.copy(next);
+      }
 
+      function tryDodgeRoll() {
+        if (!state.running || player.rollTime > 0 || player.rollCooldown > 0 || player.stamina < 34) return;
+        const move = currentMoveDirection();
         if (move.lengthSq() > 0.01) {
-          const targetYaw = Math.atan2(move.x, move.z);
-          player.group.rotation.y = lerpAngle(player.group.rotation.y, targetYaw, 12 * dt);
+          player.rollDir.copy(move);
         } else {
-          player.group.rotation.y = lerpAngle(player.group.rotation.y, pointer.yaw + Math.PI, 7 * dt);
+          player.rollDir.set(Math.sin(pointer.yaw), 0, -Math.cos(pointer.yaw)).normalize();
         }
+        player.stamina = Math.max(0, player.stamina - 34);
+        player.rollTime = player.rollDuration;
+        player.rollCooldown = 0.82;
+        player.staminaExhausted = player.stamina < 28;
+        showToast("ドッジロール");
+      }
 
-        if ((pointer.firing || keys.has(" ") || touch.firing) && player.reload <= 0) shoot();
-        if (player.ammo === 0 && player.reserve > 0) reload();
+      function animatePlayer(dt, moveAmount, dashing, rolling) {
+        const parts = player.parts;
+        const t = performance.now() * 0.001;
+        const stride = moveAmount > 0.01 ? Math.sin(t * (dashing ? 14 : 9)) : 0;
+        const armSwing = stride * (dashing ? 0.85 : 0.55);
+        const legSwing = stride * (dashing ? 1.0 : 0.68);
+
+        parts.leftArm.rotation.x = lerp(parts.leftArm.rotation.x, rolling ? -1.65 : armSwing, 10 * dt);
+        parts.rightArm.rotation.x = lerp(parts.rightArm.rotation.x, rolling ? -1.25 : -armSwing * 0.55, 10 * dt);
+        parts.leftLeg.rotation.x = lerp(parts.leftLeg.rotation.x, rolling ? 1.1 : -legSwing, 10 * dt);
+        parts.rightLeg.rotation.x = lerp(parts.rightLeg.rotation.x, rolling ? -1.1 : legSwing, 10 * dt);
+        parts.torso.rotation.x = lerp(parts.torso.rotation.x, rolling ? -1.2 : dashing ? 0.16 : 0, 8 * dt);
+        parts.head.rotation.x = lerp(parts.head.rotation.x, rolling ? 0.45 : 0, 8 * dt);
+        player.model.position.y = lerp(player.model.position.y, rolling ? 0.38 : 0, 12 * dt);
+        player.model.rotation.x = lerp(player.model.rotation.x, rolling ? Math.sin((1 - player.rollTime / player.rollDuration) * Math.PI * 2) * 1.8 : 0, 12 * dt);
       }
 
       function resolveWorldCollision(pos, radius) {
@@ -920,15 +1041,16 @@
 
       function shoot() {
         if (player.fireDelay > 0 || player.ammo <= 0 || player.reload > 0) return;
-        player.fireDelay = 0.12;
+        player.fireDelay = pointer.aiming || touch.aim ? 0.105 : 0.12;
         player.ammo--;
 
         const dir = aimDirection();
-        const start = player.group.position.clone().add(new THREE.Vector3(0, 1.55, 0)).addScaledVector(dir, 1.6);
-        const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), mats.bullet);
+        const start = player.group.position.clone().add(new THREE.Vector3(0, 1.62, 0)).addScaledVector(dir, 1.8);
+        const mesh = makeProjectileMesh(0xffe095, mats.bullet, mats.bulletTrail, 3.4, 0.12);
         mesh.position.copy(start);
+        orientAlong(mesh, dir);
         scene.add(mesh);
-        bullets.push({ mesh, dir, life: 1.25, damage: 30, last: start.clone() });
+        bullets.push({ mesh, dir, life: 1.25, damage: 30, last: start.clone(), speed: 68 });
         addSpark(start, 0xffd985, 5, 4);
       }
 
@@ -937,6 +1059,22 @@
         camera.getWorldDirection(dir);
         dir.y = clamp(dir.y, -0.25, 0.2);
         return dir.normalize();
+      }
+
+      function makeProjectileMesh(color, coreMat, trailMat, length, radius) {
+        const group = new THREE.Group();
+        const core = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.35, 10, 8), coreMat);
+        const trail = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.5, radius * 0.16, length, 10, 1, true), trailMat);
+        trail.position.y = length / 2;
+        group.add(trail);
+        group.add(core);
+        const light = new THREE.PointLight(color, 0.8, 7);
+        group.add(light);
+        return group;
+      }
+
+      function orientAlong(object, dir) {
+        object.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
       }
 
       function reload() {
@@ -955,7 +1093,8 @@
       function updateBullets(dt) {
         for (const bullet of bullets) {
           bullet.last.copy(bullet.mesh.position);
-          bullet.mesh.position.addScaledVector(bullet.dir, 58 * dt);
+          bullet.mesh.position.addScaledVector(bullet.dir, bullet.speed * dt);
+          orientAlong(bullet.mesh, bullet.dir);
           bullet.life -= dt;
 
           for (const obs of obstacles) {
@@ -982,6 +1121,44 @@
         }
       }
 
+      function fireEnemyProjectile(enemy) {
+        const target = player.group.position.clone().add(new THREE.Vector3(0, 1.1, 0));
+        const start = enemy.group.position.clone().add(new THREE.Vector3(0, 0.1, 0));
+        const dir = target.sub(start).normalize();
+        const mesh = makeProjectileMesh(0xe45c52, mats.enemyBullet, mats.enemyTrail, 2.2, 0.16);
+        mesh.position.copy(start);
+        orientAlong(mesh, dir);
+        scene.add(mesh);
+        enemyBullets.push({ mesh, dir, life: 4.2, damage: 16, speed: 12 });
+      }
+
+      function updateEnemyBullets(dt) {
+        for (const bullet of enemyBullets) {
+          bullet.mesh.position.addScaledVector(bullet.dir, bullet.speed * dt);
+          orientAlong(bullet.mesh, bullet.dir);
+          bullet.life -= dt;
+
+          for (const obs of obstacles) {
+            if (Math.abs(bullet.mesh.position.x - obs.x) < obs.w * 0.75 + 1.2 && Math.abs(bullet.mesh.position.z - obs.z) < obs.d * 0.75 + 1.2) {
+              bullet.life = 0;
+              addSpark(bullet.mesh.position, 0xe45c52, 6, 2.5);
+            }
+          }
+
+          if (bullet.mesh.position.distanceTo(player.group.position.clone().add(new THREE.Vector3(0, 1.1, 0))) < 1.25) {
+            bullet.life = 0;
+            damagePlayer(bullet.damage);
+            addSpark(player.group.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0xe45c52, 10, 4);
+          }
+        }
+
+        for (let i = enemyBullets.length - 1; i >= 0; i--) {
+          if (enemyBullets[i].life > 0) continue;
+          scene.remove(enemyBullets[i].mesh);
+          enemyBullets.splice(i, 1);
+        }
+      }
+
       function updateEnemies(dt) {
         const playerPos = player.group.position;
         for (const enemy of enemies) {
@@ -992,21 +1169,53 @@
             if (i > 1) child.rotation.y += dt * 18;
           });
 
-          const toPlayer = playerPos.clone().sub(enemy.group.position);
-          toPlayer.y = 0;
-          const distance = toPlayer.length();
-          if (distance > 0.001) toPlayer.normalize();
-          const next = enemy.group.position.clone().addScaledVector(toPlayer, enemy.speed * dt);
-          resolveWorldCollision(next, enemy.radius);
-          enemy.group.position.x = clamp(next.x, -world.half + 1.5, world.half - 1.5);
-          enemy.group.position.z = clamp(next.z, -world.half + 1.5, world.half - 1.5);
-          enemy.group.lookAt(playerPos.x, enemy.group.position.y, playerPos.z);
+          updateEnemyAwareness(enemy, dt);
+
+          const target = enemy.state === "chase" ? playerPos : enemy.investigatePoint;
+          const toTarget = target.clone().sub(enemy.group.position);
+          toTarget.y = 0;
+          const targetDistance = toTarget.length();
+          if (targetDistance > 0.001) toTarget.normalize();
+
+          const move = new THREE.Vector3();
+          if (enemy.state === "chase") {
+            if (enemy.type === "hunter") {
+              move.copy(toTarget);
+            } else {
+              const strafe = new THREE.Vector3(-toTarget.z, 0, toTarget.x).multiplyScalar(Math.sin(enemy.bob * 0.6));
+              if (targetDistance < 14) move.addScaledVector(toTarget, -0.85);
+              if (targetDistance > 22) move.addScaledVector(toTarget, 0.8);
+              move.addScaledVector(strafe, 0.55);
+            }
+          } else if (enemy.state === "investigate" && targetDistance > 2.4) {
+            move.copy(toTarget).multiplyScalar(0.72);
+          } else if (enemy.state === "idle") {
+            enemy.patrolAngle += Math.sin(enemy.bob) * dt * 0.42;
+            move.set(Math.sin(enemy.patrolAngle), 0, Math.cos(enemy.patrolAngle)).multiplyScalar(0.25);
+          }
+
+          if (move.lengthSq() > 0.01) {
+            move.normalize();
+            const next = enemy.group.position.clone().addScaledVector(move, enemy.speed * dt);
+            resolveWorldCollision(next, enemy.radius);
+            enemy.group.position.x = clamp(next.x, -world.half + 1.5, world.half - 1.5);
+            enemy.group.position.z = clamp(next.z, -world.half + 1.5, world.half - 1.5);
+          }
+
+          const lookTarget = enemy.state === "idle" ? enemy.group.position.clone().add(move.lengthSq() > 0.01 ? move : new THREE.Vector3(Math.sin(enemy.patrolAngle), 0, Math.cos(enemy.patrolAngle))) : target;
+          enemy.group.lookAt(lookTarget.x, enemy.group.position.y, lookTarget.z);
 
           enemy.cooldown -= dt;
-          if (distance < (enemy.type === "hunter" ? 6.2 : 5.1) && enemy.cooldown <= 0) {
-            enemy.cooldown = enemy.type === "hunter" ? 0.68 : 0.88;
-            damagePlayer(enemy.type === "hunter" ? 18 : 12);
+          enemy.shootCooldown -= dt;
+          const playerDistance = enemy.group.position.distanceTo(playerPos);
+          if (enemy.type === "hunter" && enemy.state === "chase" && playerDistance < 5.5 && enemy.cooldown <= 0) {
+            enemy.cooldown = 0.72;
+            damagePlayer(18);
             addSpark(player.group.position.clone().add(new THREE.Vector3(0, 1.2, 0)), 0xe45c52, 12, 4);
+          }
+          if (enemy.type === "scout" && enemy.state === "chase" && playerDistance < 32 && enemy.shootCooldown <= 0 && canSeePlayer(enemy, 40)) {
+            enemy.shootCooldown = rand(1.8, 3.1);
+            fireEnemyProjectile(enemy);
           }
         }
 
@@ -1015,6 +1224,71 @@
           scene.remove(enemies[i].group);
           enemies.splice(i, 1);
         }
+      }
+
+      function updateEnemyAwareness(enemy, dt) {
+        const playerPos = player.group.position;
+        const distance = enemy.group.position.distanceTo(playerPos);
+        const seesPlayer = canSeePlayer(enemy, enemy.state === "idle" ? 35 : 44);
+
+        if (seesPlayer) {
+          enemy.state = "chase";
+          enemy.alertTimer = 4.2;
+          enemy.investigatePoint.copy(playerPos);
+          return;
+        }
+
+        if (player.noise > 0 && distance < player.noise) {
+          enemy.state = "investigate";
+          enemy.alertTimer = Math.max(enemy.alertTimer, 2.6);
+          enemy.investigatePoint.copy(playerPos);
+          enemy.group.lookAt(playerPos.x, enemy.group.position.y, playerPos.z);
+        }
+
+        enemy.alertTimer = Math.max(0, enemy.alertTimer - dt);
+        if (enemy.alertTimer <= 0 && enemy.state !== "idle") {
+          enemy.state = "idle";
+        }
+      }
+
+      function canSeePlayer(enemy, maxDistance) {
+        const origin = enemy.group.position.clone();
+        const target = player.group.position.clone();
+        origin.y = 1.6;
+        target.y = 1.4;
+        const toPlayer = target.clone().sub(origin);
+        const distance = toPlayer.length();
+        if (distance > maxDistance) return false;
+        const dir = toPlayer.clone().normalize();
+        const facing = new THREE.Vector3();
+        enemy.group.getWorldDirection(facing);
+        facing.y = 0;
+        facing.normalize();
+        const flatDir = dir.clone();
+        flatDir.y = 0;
+        flatDir.normalize();
+        const requiredDot = enemy.state === "idle" ? 0.22 : -0.1;
+        if (facing.dot(flatDir) < requiredDot) return false;
+        return !isSightBlocked(origin, target);
+      }
+
+      function isSightBlocked(origin, target) {
+        const a = new THREE.Vector2(origin.x, origin.z);
+        const b = new THREE.Vector2(target.x, target.z);
+        for (const obs of obstacles) {
+          const center = new THREE.Vector2(obs.x, obs.z);
+          const radius = Math.max(obs.w, obs.d) * 0.62;
+          if (distancePointToSegment(center, a, b) < radius) return true;
+        }
+        return false;
+      }
+
+      function distancePointToSegment(point, a, b) {
+        const ab = b.clone().sub(a);
+        const denom = ab.lengthSq();
+        if (denom <= 0.0001) return point.distanceTo(a);
+        const t = clamp(point.clone().sub(a).dot(ab) / denom, 0, 1);
+        return point.distanceTo(a.clone().add(ab.multiplyScalar(t)));
       }
 
       function killEnemy(enemy) {
@@ -1087,17 +1361,22 @@
 
       function updateCamera(dt) {
         const playerPos = player.group.position;
+        const aiming = pointer.aiming || touch.aim;
+        const side = aiming ? 1.8 : 0;
         const offset = new THREE.Vector3(
-          Math.sin(pointer.yaw) * -7.8,
-          4.2 + Math.sin(pointer.pitch) * 2.6,
-          Math.cos(pointer.yaw) * 7.8
+          Math.sin(pointer.yaw) * (aiming ? -5.2 : -7.8) + Math.cos(pointer.yaw) * side,
+          (aiming ? 3.25 : 4.2) + Math.sin(pointer.pitch) * 2.6,
+          Math.cos(pointer.yaw) * (aiming ? 5.2 : 7.8) + Math.sin(pointer.yaw) * side
         );
         const target = playerPos.clone().add(offset);
         target.y = Math.max(2.4, target.y);
         camera.position.lerp(target, 1 - Math.pow(0.0008, dt));
         const lookAt = playerPos.clone().add(new THREE.Vector3(0, 1.45, 0));
-        lookAt.add(new THREE.Vector3(Math.sin(pointer.yaw), pointer.pitch * 1.8, -Math.cos(pointer.yaw)).multiplyScalar(5));
+        lookAt.add(new THREE.Vector3(Math.sin(pointer.yaw), pointer.pitch * 1.8, -Math.cos(pointer.yaw)).multiplyScalar(aiming ? 10 : 5));
         camera.lookAt(lookAt);
+        const targetFov = aiming ? 46 : 62;
+        camera.fov = lerp(camera.fov, targetFov, 8 * dt);
+        camera.updateProjectionMatrix();
       }
 
       function render() {
@@ -1154,9 +1433,14 @@
         window.addEventListener("keydown", (event) => {
           keys.add(event.key.toLowerCase());
           if (event.key.toLowerCase() === "r") reload();
+          if (event.code === "AltLeft") {
+            event.preventDefault();
+            tryDodgeRoll();
+          }
           if (event.key === " ") event.preventDefault();
         });
         window.addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
+        window.addEventListener("contextmenu", (event) => event.preventDefault());
         document.addEventListener("pointerlockchange", () => {
           pointer.locked = document.pointerLockElement === renderer.domElement;
         });
@@ -1165,16 +1449,21 @@
           pointer.yaw += event.movementX * 0.0022;
           pointer.pitch = clamp(pointer.pitch - event.movementY * 0.0017, -0.58, 0.42);
         });
-        renderer.domElement.addEventListener("mousedown", () => {
-          pointer.firing = true;
+        renderer.domElement.addEventListener("mousedown", (event) => {
+          if (event.button === 2) {
+            pointer.aiming = true;
+          } else if (event.button === 0) {
+            pointer.firing = true;
+          }
           if (state.running && !pointer.locked && !isTouchDevice()) renderer.domElement.requestPointerLock?.();
         });
-        window.addEventListener("mouseup", () => {
-          pointer.firing = false;
+        window.addEventListener("mouseup", (event) => {
+          if (event.button === 2) pointer.aiming = false;
+          if (event.button === 0) pointer.firing = false;
         });
         ui.startBtn.addEventListener("click", startRaid);
         ui.controlsBtn.addEventListener("click", () => {
-          ui.overlay.querySelector(".modal > p:not(.kicker)").textContent = "WASD/矢印で移動、Shiftでダッシュ、マウスで視点操作、クリックまたはSpaceで射撃、Rでリロード。青いコアを4つ集めたら北東のビーコンへ。";
+          ui.overlay.querySelector(".modal > p:not(.kicker)").textContent = "WASD/矢印で移動、Shiftでダッシュ、左Altでドッジロール、右クリック長押しでエイム、クリックまたはSpaceで射撃、Rでリロード。青いコアを4つ集めたら北東のビーコンへ。";
         });
         bindTouch();
       }
@@ -1186,7 +1475,9 @@
         ui.touchDash.addEventListener("pointerdown", () => { touch.dash = true; });
         ui.touchDash.addEventListener("pointerup", () => { touch.dash = false; });
         ui.touchReload.addEventListener("click", reload);
-        ui.touchAim.addEventListener("pointerdown", () => { touch.aim = true; pointer.yaw += 0.12; });
+        ui.touchAim.addEventListener("pointerdown", () => { touch.aim = true; });
+        ui.touchAim.addEventListener("pointerup", () => { touch.aim = false; });
+        ui.touchAim.addEventListener("pointercancel", () => { touch.aim = false; });
 
         ui.stick.addEventListener("pointerdown", (event) => {
           touch.active = true;
@@ -1246,6 +1537,10 @@
       function lerpAngle(a, b, t) {
         const delta = Math.atan2(Math.sin(b - a), Math.cos(b - a));
         return a + delta * clamp(t, 0, 1);
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * clamp(t, 0, 1);
       }
 
       function isTouchDevice() {
