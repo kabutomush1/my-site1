@@ -174,6 +174,10 @@
         background: var(--cyan);
       }
 
+      #staminaBar {
+        background: var(--green);
+      }
+
       #ammoBar {
         background: var(--gold);
       }
@@ -445,6 +449,11 @@
             <b id="shieldText">100</b>
           </div>
           <div class="bar-row">
+            <span>STAMINA</span>
+            <div class="bar"><i id="staminaBar"></i></div>
+            <b id="staminaText">100</b>
+          </div>
+          <div class="bar-row">
             <span>AMMO</span>
             <div class="bar"><i id="ammoBar"></i></div>
             <b id="ammoText">24</b>
@@ -502,9 +511,11 @@
         kills: document.getElementById("kills"),
         healthBar: document.getElementById("healthBar"),
         shieldBar: document.getElementById("shieldBar"),
+        staminaBar: document.getElementById("staminaBar"),
         ammoBar: document.getElementById("ammoBar"),
         healthText: document.getElementById("healthText"),
         shieldText: document.getElementById("shieldText"),
+        staminaText: document.getElementById("staminaText"),
         ammoText: document.getElementById("ammoText"),
         objective: document.getElementById("objectiveText"),
         toast: document.getElementById("toast"),
@@ -563,7 +574,8 @@
         reserve: 96,
         reload: 0,
         fireDelay: 0,
-        dashHeat: 0,
+        stamina: 100,
+        staminaExhausted: false,
         cores: 0,
         kills: 0
       };
@@ -783,7 +795,8 @@
           reserve: 96,
           reload: 0,
           fireDelay: 0,
-          dashHeat: 0,
+          stamina: 100,
+          staminaExhausted: false,
           cores: 0,
           kills: 0
         });
@@ -805,7 +818,6 @@
         if (state.time <= 0) endRaid(false, "時間切れ。回収ビーコンが離脱しました。");
 
         player.fireDelay = Math.max(0, player.fireDelay - dt);
-        player.dashHeat = Math.max(0, player.dashHeat - dt * 0.45);
         if (player.reload > 0) {
           player.reload -= dt;
           if (player.reload <= 0) finishReload();
@@ -851,9 +863,17 @@
         move.addScaledVector(right, mx);
         if (move.lengthSq() > 0.01) move.normalize();
 
-        const dashing = (keys.has("shift") || touch.dash) && player.dashHeat < 0.92 && move.lengthSq() > 0;
+        if (player.stamina <= 0) player.staminaExhausted = true;
+        if (player.stamina >= 28) player.staminaExhausted = false;
+
+        const wantsDash = keys.has("shift") || touch.dash;
+        const dashing = wantsDash && !player.staminaExhausted && player.stamina > 0 && move.lengthSq() > 0;
         const speed = dashing ? 13.5 : 8.2;
-        if (dashing) player.dashHeat += dt * 0.55;
+        if (dashing) {
+          player.stamina = Math.max(0, player.stamina - dt * 34);
+        } else {
+          player.stamina = Math.min(100, player.stamina + dt * 22);
+        }
 
         const next = player.group.position.clone().addScaledVector(move, speed * dt);
         next.x = clamp(next.x, -world.half + 2, world.half - 2);
@@ -1098,9 +1118,11 @@
         ui.kills.textContent = player.kills;
         ui.healthText.textContent = Math.ceil(player.health);
         ui.shieldText.textContent = Math.ceil(player.shield);
+        ui.staminaText.textContent = Math.ceil(player.stamina);
         ui.ammoText.textContent = player.reload > 0 ? "..." : player.ammo;
         ui.healthBar.style.transform = `scaleX(${player.health / 100})`;
         ui.shieldBar.style.transform = `scaleX(${player.shield / 100})`;
+        ui.staminaBar.style.transform = `scaleX(${player.stamina / 100})`;
         ui.ammoBar.style.transform = `scaleX(${player.ammo / player.mag})`;
         if (performance.now() > state.toastUntil) ui.toast.classList.remove("show");
       }
@@ -1140,7 +1162,7 @@
         });
         window.addEventListener("mousemove", (event) => {
           if (!pointer.locked && state.running && !isTouchDevice()) return;
-          pointer.yaw -= event.movementX * 0.0022;
+          pointer.yaw += event.movementX * 0.0022;
           pointer.pitch = clamp(pointer.pitch - event.movementY * 0.0017, -0.58, 0.42);
         });
         renderer.domElement.addEventListener("mousedown", () => {
