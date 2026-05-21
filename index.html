@@ -3,816 +3,1099 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ARC Raiders レイドボード</title>
+    <title>ARC RAIDERS - Browser Raid</title>
     <style>
       :root {
         color-scheme: dark;
-        --bg: #10120f;
-        --panel: #1b1d18;
-        --panel-strong: #24271f;
-        --text: #f1eee4;
-        --muted: #b9b19f;
-        --line: #3b3d33;
-        --accent: #e1b957;
-        --danger: #e36d56;
-        --success: #76c989;
+        --bg: #0d0f10;
+        --panel: rgba(17, 20, 21, 0.86);
+        --panel-solid: #141819;
+        --line: rgba(233, 229, 216, 0.17);
+        --text: #f3efe4;
+        --muted: #b8b2a2;
+        --gold: #d9b35c;
+        --cyan: #57c6d9;
+        --red: #e75f54;
+        --green: #7bc97d;
       }
 
       * {
         box-sizing: border-box;
       }
 
-      html {
-        scroll-behavior: smooth;
+      html,
+      body {
+        width: 100%;
+        height: 100%;
       }
 
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        line-height: 1.6;
+        overflow: hidden;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: var(--text);
         background:
-          radial-gradient(circle at 12% 0%, rgba(225, 185, 87, 0.18), transparent 28rem),
-          radial-gradient(circle at 100% 14%, rgba(118, 201, 137, 0.11), transparent 24rem),
-          linear-gradient(145deg, #10120f 0%, #191b15 48%, #0f110e 100%);
+          linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 22%),
+          radial-gradient(circle at 12% 10%, rgba(217, 179, 92, 0.16), transparent 28rem),
+          radial-gradient(circle at 86% 12%, rgba(87, 198, 217, 0.12), transparent 24rem),
+          var(--bg);
       }
 
-      img {
-        display: block;
-        max-width: 100%;
-      }
-
-      a {
-        color: inherit;
-      }
-
-      input,
-      select,
-      textarea,
       button {
-        font: inherit;
-      }
-
-      .site-header {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        border-bottom: 1px solid rgba(241, 238, 228, 0.12);
-        background: rgba(16, 18, 15, 0.9);
-        backdrop-filter: blur(14px);
-      }
-
-      .nav {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 16px 24px;
-      }
-
-      .brand {
-        display: grid;
-        text-decoration: none;
-      }
-
-      .brand strong {
-        font-size: 0.95rem;
-        letter-spacing: 0.08em;
-      }
-
-      .brand span {
-        color: var(--muted);
-        font-size: 0.78rem;
-      }
-
-      .nav-links {
-        display: flex;
-        gap: 18px;
-        color: var(--muted);
-        font-size: 0.9rem;
-      }
-
-      .hero {
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 74px 24px 42px;
-      }
-
-      .hero-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
-        align-items: center;
-        gap: 40px;
-      }
-
-      .eyebrow {
-        margin: 0 0 14px;
-        color: var(--accent);
-        font-size: 0.82rem;
-        font-weight: 800;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-      }
-
-      h1,
-      h2,
-      h3 {
-        margin: 0;
-        line-height: 1.08;
-      }
-
-      h1 {
-        max-width: 760px;
-        font-size: clamp(2.35rem, 7vw, 5.5rem);
-        line-height: 0.95;
-      }
-
-      h2 {
-        font-size: clamp(1.6rem, 4vw, 2.6rem);
-      }
-
-      .lead {
-        max-width: 640px;
-        margin: 24px 0 0;
-        color: var(--muted);
-        font-size: clamp(1rem, 2vw, 1.2rem);
-      }
-
-      .hero-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 30px;
-      }
-
-      .button,
-      button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         min-height: 44px;
-        padding: 0 18px;
-        border: 1px solid rgba(241, 238, 228, 0.16);
-        border-radius: 6px;
-        background: var(--accent);
-        color: #16130b;
-        font-weight: 800;
-        text-decoration: none;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--gold);
+        color: #14110b;
+        font: inherit;
+        font-weight: 850;
         cursor: pointer;
       }
 
-      .button.secondary {
-        background: transparent;
+      button.secondary {
+        background: rgba(243, 239, 228, 0.08);
         color: var(--text);
       }
 
-      .button.ghost {
-        background: rgba(241, 238, 228, 0.08);
-        color: var(--text);
-      }
-
-      .hero-photo,
-      .submit-panel,
-      .raid-card,
-      .record-panel,
-      .notice {
-        border: 1px solid rgba(241, 238, 228, 0.12);
-        border-radius: 8px;
-        background: rgba(27, 29, 24, 0.92);
-      }
-
-      .hero-photo {
-        overflow: hidden;
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
-      }
-
-      .hero-photo img {
-        width: 100%;
-        aspect-ratio: 4 / 3;
-        object-fit: cover;
-        filter: saturate(0.92) contrast(1.08);
-      }
-
-      .hero-caption {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        padding: 14px 16px;
-        color: var(--muted);
-        font-size: 0.86rem;
-      }
-
-      main {
-        max-width: 1180px;
-        margin: 0 auto;
-        padding: 28px 24px 76px;
-      }
-
-      section + section {
-        margin-top: 64px;
-      }
-
-      .section-head {
-        display: flex;
-        align-items: end;
-        justify-content: space-between;
-        gap: 24px;
-        margin-bottom: 18px;
-      }
-
-      .section-head p {
-        max-width: 470px;
-        margin: 0;
-        color: var(--muted);
-      }
-
-      .submit-panel {
+      .shell {
+        position: fixed;
+        inset: 0;
         display: grid;
-        grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
-        gap: 24px;
-        padding: 22px;
+        grid-template-rows: auto 1fr auto;
       }
 
-      .submit-copy p {
-        margin: 14px 0 0;
-        color: var(--muted);
-      }
-
-      .submit-copy ul {
+      .hud {
+        position: relative;
+        z-index: 2;
         display: grid;
-        gap: 10px;
-        margin: 22px 0 0;
-        padding: 0;
-        list-style: none;
-        color: var(--muted);
-      }
-
-      .submit-copy li {
-        padding-left: 16px;
-        border-left: 3px solid var(--accent);
-      }
-
-      .report-form {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-      }
-
-      .field {
-        display: grid;
-        gap: 6px;
-      }
-
-      .field.full {
-        grid-column: 1 / -1;
-      }
-
-      label {
-        color: #ded7c8;
-        font-size: 0.86rem;
-        font-weight: 800;
-      }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        border: 1px solid rgba(241, 238, 228, 0.14);
-        border-radius: 6px;
-        background: rgba(16, 18, 15, 0.72);
-        color: var(--text);
-      }
-
-      input,
-      select {
-        min-height: 42px;
-        padding: 0 12px;
-      }
-
-      textarea {
-        min-height: 118px;
-        resize: vertical;
-        padding: 10px 12px;
-      }
-
-      .form-actions {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
+        grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
         gap: 12px;
-        grid-column: 1 / -1;
-      }
-
-      .form-note {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-
-      .notice {
-        margin-top: 16px;
-        padding: 16px;
-        color: var(--muted);
-        background: rgba(225, 185, 87, 0.08);
-      }
-
-      .raid-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 18px;
-      }
-
-      .raid-card {
-        overflow: hidden;
-      }
-
-      .raid-card img {
-        width: 100%;
-        aspect-ratio: 16 / 10;
-        object-fit: cover;
-        background: var(--panel-strong);
-      }
-
-      .raid-body {
-        display: grid;
-        gap: 14px;
-        padding: 16px;
-      }
-
-      .raid-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .tag {
-        display: inline-flex;
-        align-items: center;
-        min-height: 26px;
-        padding: 0 9px;
-        border: 1px solid rgba(241, 238, 228, 0.12);
-        border-radius: 999px;
-        color: var(--muted);
-        font-size: 0.76rem;
-        font-weight: 800;
-      }
-
-      .tag.success {
-        border-color: rgba(118, 201, 137, 0.35);
-        color: var(--success);
-      }
-
-      .tag.danger {
-        border-color: rgba(227, 109, 86, 0.35);
-        color: var(--danger);
-      }
-
-      .raid-card h3 {
-        font-size: 1.18rem;
-      }
-
-      .raid-card p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.95rem;
-      }
-
-      .loot-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .loot-list li {
-        padding: 6px 9px;
-        border-radius: 4px;
-        background: var(--panel-strong);
-        color: #ded7c8;
-        font-size: 0.82rem;
-      }
-
-      .record-panel {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-        padding: 18px;
-        background: rgba(36, 39, 31, 0.72);
-      }
-
-      .record-item {
+        align-items: start;
         padding: 14px;
-        border-left: 3px solid var(--accent);
-        background: rgba(16, 18, 15, 0.46);
+        pointer-events: none;
       }
 
-      .record-item strong {
+      .brand,
+      .status,
+      .loadout,
+      .objective,
+      .toast,
+      .modal {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.26);
+      }
+
+      .brand {
+        width: max-content;
+        min-width: 230px;
+        padding: 11px 13px;
+        border-radius: 8px;
+      }
+
+      .brand strong {
         display: block;
-        font-size: 1.7rem;
+        letter-spacing: 0.12em;
         line-height: 1;
       }
 
-      .record-item span {
+      .brand span,
+      .hint,
+      .metric span,
+      .objective p,
+      .toast {
         color: var(--muted);
-        font-size: 0.86rem;
       }
 
-      .empty {
-        grid-column: 1 / -1;
-        padding: 28px;
-        border: 1px dashed rgba(241, 238, 228, 0.2);
+      .brand span {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.78rem;
+      }
+
+      .status {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        justify-self: center;
+        min-width: 360px;
+        padding: 10px;
         border-radius: 8px;
-        color: var(--muted);
+      }
+
+      .metric {
+        min-width: 94px;
+        padding: 5px 10px;
+        border-right: 1px solid var(--line);
         text-align: center;
       }
 
-      @media (max-width: 900px) {
-        .hero-grid,
-        .submit-panel,
-        .raid-grid,
-        .record-panel {
-          grid-template-columns: 1fr;
-        }
-
-        .section-head {
-          align-items: start;
-          flex-direction: column;
-        }
+      .metric:last-child {
+        border-right: 0;
       }
 
-      @media (max-width: 640px) {
-        .nav {
-          align-items: start;
-          flex-direction: column;
+      .metric strong {
+        display: block;
+        font-size: 1.06rem;
+        line-height: 1.1;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 2px;
+        font-size: 0.69rem;
+        font-weight: 750;
+        letter-spacing: 0.12em;
+      }
+
+      .loadout {
+        justify-self: end;
+        width: min(390px, 100%);
+        padding: 10px 12px;
+        border-radius: 8px;
+      }
+
+      .bars {
+        display: grid;
+        gap: 8px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 72px 1fr 38px;
+        gap: 9px;
+        align-items: center;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+      }
+
+      .bar {
+        height: 9px;
+        overflow: hidden;
+        border: 1px solid rgba(243, 239, 228, 0.14);
+        border-radius: 999px;
+        background: rgba(243, 239, 228, 0.1);
+      }
+
+      .bar i {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: var(--green);
+        transform-origin: left center;
+      }
+
+      #shieldBar {
+        background: var(--cyan);
+      }
+
+      #ammoBar {
+        background: var(--gold);
+      }
+
+      .objective {
+        position: absolute;
+        left: 14px;
+        bottom: 82px;
+        z-index: 2;
+        width: min(360px, calc(100vw - 28px));
+        padding: 13px 15px;
+        border-radius: 8px;
+        pointer-events: none;
+      }
+
+      .objective h2 {
+        margin: 0 0 7px;
+        font-size: 0.88rem;
+        letter-spacing: 0.13em;
+      }
+
+      .objective p {
+        margin: 0;
+        font-size: 0.91rem;
+        line-height: 1.45;
+      }
+
+      .hint {
+        position: absolute;
+        right: 14px;
+        bottom: 16px;
+        z-index: 2;
+        max-width: min(530px, calc(100vw - 28px));
+        font-size: 0.82rem;
+        text-align: right;
+        text-shadow: 0 2px 14px #000;
+        pointer-events: none;
+      }
+
+      .toast {
+        position: absolute;
+        left: 50%;
+        bottom: 26px;
+        z-index: 3;
+        width: min(440px, calc(100vw - 28px));
+        padding: 12px 14px;
+        border-radius: 8px;
+        text-align: center;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 160ms ease;
+        pointer-events: none;
+      }
+
+      .toast.show {
+        opacity: 1;
+      }
+
+      canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 5;
+        display: grid;
+        place-items: center;
+        padding: 22px;
+        background:
+          linear-gradient(180deg, rgba(8, 9, 9, 0.78), rgba(8, 9, 9, 0.66)),
+          radial-gradient(circle at center, rgba(217, 179, 92, 0.12), transparent 36rem);
+      }
+
+      .overlay.hidden {
+        display: none;
+      }
+
+      .modal {
+        width: min(660px, 100%);
+        padding: clamp(20px, 5vw, 36px);
+        border-radius: 8px;
+      }
+
+      .modal .kicker {
+        margin: 0 0 12px;
+        color: var(--gold);
+        font-size: 0.78rem;
+        font-weight: 850;
+        letter-spacing: 0.18em;
+      }
+
+      .modal h1 {
+        margin: 0;
+        font-size: clamp(2.1rem, 7vw, 4.5rem);
+        line-height: 0.96;
+      }
+
+      .modal p {
+        margin: 16px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .modal-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .modal-actions button {
+        padding: 0 18px;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .summary div {
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: rgba(243, 239, 228, 0.06);
+      }
+
+      .summary strong {
+        display: block;
+        font-size: 1.2rem;
+      }
+
+      .summary span {
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+      }
+
+      @media (max-width: 760px) {
+        .hud {
+          grid-template-columns: 1fr;
+          gap: 8px;
+          padding: 10px;
         }
 
-        .nav-links {
+        .brand,
+        .status,
+        .loadout {
           width: 100%;
-          justify-content: space-between;
+          min-width: 0;
         }
 
-        .hero {
-          padding-top: 48px;
+        .status {
+          justify-self: stretch;
+          overflow-x: auto;
         }
 
-        .hero-actions,
-        .form-actions {
-          flex-direction: column;
+        .loadout {
+          justify-self: stretch;
         }
 
-        .button,
-        button {
-          width: 100%;
+        .objective {
+          display: none;
         }
 
-        .report-form {
+        .hint {
+          left: 10px;
+          right: 10px;
+          font-size: 0.76rem;
+          text-align: center;
+        }
+
+        .summary {
           grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
-    <header class="site-header">
-      <nav class="nav" aria-label="メインナビゲーション">
-        <a class="brand" href="#">
-          <strong>ARC Raiders レイドボード</strong>
-          <span>Community Raid Reports</span>
-        </a>
-        <div class="nav-links">
-          <a href="#submit">投稿する</a>
-          <a href="#reports">レイド報告</a>
-          <a href="#records">戦績</a>
+    <div class="shell" aria-label="ARC RAIDERS browser game">
+      <canvas id="game" width="1280" height="720"></canvas>
+      <div class="hud">
+        <div class="brand">
+          <strong>ARC RAIDERS</strong>
+          <span>Browser extraction raid</span>
         </div>
-      </nav>
-    </header>
-
-    <section class="hero">
-      <div class="hero-grid">
-        <div>
-          <p class="eyebrow">Loot or Lost</p>
-          <h1>みんなのレイド結果を、写真と一緒に集める。</h1>
-          <p class="lead">
-            ARC Raidersで帰還できた回も、戦利品を抱えたまま倒れた回も、プレイヤー同士で気軽に共有するためのレイド報告サイトです。
-          </p>
-          <div class="hero-actions">
-            <a class="button" href="#submit">レイドを報告する</a>
-            <a class="button secondary" href="#reports">投稿を見る</a>
+        <div class="status" aria-live="polite">
+          <div class="metric">
+            <strong id="timer">04:00</strong>
+            <span>TIME</span>
+          </div>
+          <div class="metric">
+            <strong id="cores">0/5</strong>
+            <span>CORES</span>
+          </div>
+          <div class="metric">
+            <strong id="drones">0</strong>
+            <span>DRONES</span>
           </div>
         </div>
-        <figure class="hero-photo">
-          <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80" alt="暗い部屋でゲームをプレイしているデスク環境">
-          <figcaption class="hero-caption">
-            <span>Community Board</span>
-            <span>GitHub Issues連携</span>
-          </figcaption>
-        </figure>
+        <div class="loadout">
+          <div class="bars">
+            <div class="bar-row">
+              <span>HEALTH</span>
+              <div class="bar"><i id="healthBar"></i></div>
+              <b id="healthText">100</b>
+            </div>
+            <div class="bar-row">
+              <span>SHIELD</span>
+              <div class="bar"><i id="shieldBar"></i></div>
+              <b id="shieldText">100</b>
+            </div>
+            <div class="bar-row">
+              <span>AMMO</span>
+              <div class="bar"><i id="ammoBar"></i></div>
+              <b id="ammoText">30</b>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
 
-    <main>
-      <section id="submit" aria-labelledby="submit-title">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Submit</p>
-            <h2 id="submit-title">レイド結果を投稿する</h2>
-          </div>
-          <p>フォームを埋めると、GitHubの投稿画面が開きます。画像はURLを入れるか、開いたIssue画面にドラッグして添付できます。</p>
-        </div>
-
-        <div class="submit-panel">
-          <div class="submit-copy">
-            <h3>投稿の流れ</h3>
-            <p>GitHub Pagesだけでは直接データを保存できないため、GitHub Issuesを投稿箱として使います。</p>
-            <ul>
-              <li>このフォームでレイド内容を入力</li>
-              <li>GitHubのIssue作成画面で内容を確認</li>
-              <li>投稿されたIssueをサイトが読み込んで一覧に表示</li>
-            </ul>
-          </div>
-
-          <form class="report-form" id="report-form">
-            <div class="field">
-              <label for="player">プレイヤー名</label>
-              <input id="player" name="player" placeholder="例: kabutomush1" required>
-            </div>
-            <div class="field">
-              <label for="outcome">結果</label>
-              <select id="outcome" name="outcome" required>
-                <option value="帰還成功">帰還成功</option>
-                <option value="レイド先で倒れた">レイド先で倒れた</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="party">人数</label>
-              <select id="party" name="party">
-                <option value="ソロ">ソロ</option>
-                <option value="デュオ">デュオ</option>
-                <option value="スクワッド">スクワッド</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="map">マップ・場所</label>
-              <input id="map" name="map" placeholder="例: Dam Battlegrounds">
-            </div>
-            <div class="field full">
-              <label for="title">レイドのタイトル</label>
-              <input id="title" name="title" placeholder="例: 欲張らずに帰還できた回" required>
-            </div>
-            <div class="field full">
-              <label for="loot">戦利品</label>
-              <input id="loot" name="loot" placeholder="例: 武器パーツ, 医療品, レア素材">
-            </div>
-            <div class="field full">
-              <label for="image">画像URL</label>
-              <input id="image" name="image" type="url" placeholder="https://example.com/raid-screenshot.jpg">
-            </div>
-            <div class="field full">
-              <label for="comment">コメント</label>
-              <textarea id="comment" name="comment" placeholder="何が起きたか、良かった判断、反省点など" required></textarea>
-            </div>
-            <div class="form-actions">
-              <button type="submit">GitHubで投稿する</button>
-              <p class="form-note">投稿にはGitHubアカウントが必要です。</p>
-            </div>
-          </form>
-        </div>
-
-        <div class="notice">
-          公開サイトにすぐ反映したい場合は、Issueのタイトルを <strong>[RAID]</strong> で始めてください。このフォームから開けば自動で入ります。
-        </div>
+      <section class="objective">
+        <h2>OBJECTIVE</h2>
+        <p id="objectiveText">地上に散らばったアークコアを5つ回収し、マップ北東の回収ビーコンへ脱出。</p>
       </section>
 
-      <section id="reports" aria-labelledby="reports-title">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Raid Reports</p>
-            <h2 id="reports-title">みんなのレイド報告</h2>
-          </div>
-          <p id="loading-message">GitHub Issuesから投稿を読み込み中です。</p>
-        </div>
+      <div class="toast" id="toast"></div>
+      <div class="hint">WASD/矢印: 移動 ・ Shift: ダッシュ ・ マウス: 照準 ・ クリック/Space: 射撃 ・ R: リロード</div>
+    </div>
 
-        <div class="raid-grid" id="raid-grid"></div>
-      </section>
-
-      <section id="records" class="record-panel" aria-label="レイド戦績">
-        <div class="record-item">
-          <strong id="total-count">0</strong>
-          <span>表示中の投稿</span>
+    <div class="overlay" id="overlay">
+      <div class="modal">
+        <p class="kicker">SOLO RAID PROTOTYPE</p>
+        <h1>ARC RAIDERS</h1>
+        <p>
+          廃墟エリアに降下し、アークコアを集めて脱出してください。ドローンは音と光に反応して追跡します。
+          弾薬箱と修理キットを拾いながら、時間切れになる前に回収ビーコンへ向かいましょう。
+        </p>
+        <div class="summary" id="summary" hidden>
+          <div><strong id="resultCores">0</strong><span>CORES</span></div>
+          <div><strong id="resultKills">0</strong><span>DRONES</span></div>
+          <div><strong id="resultTime">00:00</strong><span>TIME LEFT</span></div>
         </div>
-        <div class="record-item">
-          <strong id="success-count">0</strong>
-          <span>帰還成功</span>
+        <div class="modal-actions">
+          <button id="startBtn">レイド開始</button>
+          <button class="secondary" id="howBtn" type="button">操作を確認</button>
         </div>
-        <div class="record-item">
-          <strong id="down-count">0</strong>
-          <span>倒れた回</span>
-        </div>
-        <div class="record-item">
-          <strong id="success-rate">0%</strong>
-          <span>帰還率</span>
-        </div>
-      </section>
-    </main>
+      </div>
+    </div>
 
     <script>
-      const repoOwner = "kabutomush1";
-      const repoName = "my-site1";
-      const issueListUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/issues?state=open&per_page=50`;
-      const newIssueUrl = `https://github.com/${repoOwner}/${repoName}/issues/new`;
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+      const ui = {
+        timer: document.getElementById("timer"),
+        cores: document.getElementById("cores"),
+        drones: document.getElementById("drones"),
+        healthBar: document.getElementById("healthBar"),
+        shieldBar: document.getElementById("shieldBar"),
+        ammoBar: document.getElementById("ammoBar"),
+        healthText: document.getElementById("healthText"),
+        shieldText: document.getElementById("shieldText"),
+        ammoText: document.getElementById("ammoText"),
+        objective: document.getElementById("objectiveText"),
+        overlay: document.getElementById("overlay"),
+        startBtn: document.getElementById("startBtn"),
+        howBtn: document.getElementById("howBtn"),
+        toast: document.getElementById("toast"),
+        summary: document.getElementById("summary"),
+        resultCores: document.getElementById("resultCores"),
+        resultKills: document.getElementById("resultKills"),
+        resultTime: document.getElementById("resultTime")
+      };
 
-      const sampleReports = [
-        {
-          player: "情報屋",
-          outcome: "帰還成功",
-          party: "ソロ",
-          map: "探索ルート",
-          title: "欲張らずに撤収した回",
-          comment: "良い物資を拾ったあと、戦闘音を避けて早めに帰還。判断はかなり良かった。",
-          loot: ["武器パーツ", "医療品", "クラフト素材"],
-          image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=900&q=80",
-          url: "#"
-        },
-        {
-          player: "投稿サンプル",
-          outcome: "レイド先で倒れた",
-          party: "デュオ",
-          map: "交戦エリア",
-          title: "音に釣られて突っ込みすぎた回",
-          comment: "戦利品は悪くなかったけれど、帰還前に欲を出して負け。次は退路を先に見る。",
-          loot: ["レア素材", "弾薬", "回復キット"],
-          image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=900&q=80",
-          url: "#"
-        },
-        {
-          player: "チームログ",
-          outcome: "帰還成功",
-          party: "スクワッド",
-          map: "回収地点",
-          title: "味方との連携が噛み合った回",
-          comment: "索敵、回収、撤収の流れがきれいだった。写真を残したい場面が多いレイド。",
-          loot: ["高価値アイテム", "装備品", "設計素材"],
-          image: "https://images.unsplash.com/photo-1605901309584-818e25960a8f?auto=format&fit=crop&w=900&q=80",
-          url: "#"
+      const world = { width: 2600, height: 1700 };
+      const keys = new Set();
+      const mouse = { x: 0, y: 0, down: false };
+      const camera = { x: 0, y: 0 };
+      const extract = { x: 2310, y: 230, r: 82 };
+      const state = {
+        running: false,
+        over: false,
+        last: 0,
+        time: 240,
+        spawnTimer: 0,
+        wave: 1,
+        toastUntil: 0,
+        toastText: ""
+      };
+
+      const player = {
+        x: 260,
+        y: 1430,
+        r: 18,
+        speed: 260,
+        health: 100,
+        shield: 100,
+        ammo: 30,
+        mag: 30,
+        reserve: 90,
+        reload: 0,
+        fireDelay: 0,
+        dashHeat: 0,
+        kills: 0,
+        cores: 0
+      };
+
+      let bullets = [];
+      let enemies = [];
+      let pickups = [];
+      let particles = [];
+      let props = [];
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function dist(a, b) {
+        return Math.hypot(a.x - b.x, a.y - b.y);
+      }
+
+      function rand(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function resize() {
+        const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function resetGame() {
+        Object.assign(player, {
+          x: 260,
+          y: 1430,
+          health: 100,
+          shield: 100,
+          ammo: 30,
+          reserve: 90,
+          reload: 0,
+          fireDelay: 0,
+          dashHeat: 0,
+          kills: 0,
+          cores: 0
+        });
+        Object.assign(state, {
+          running: true,
+          over: false,
+          last: performance.now(),
+          time: 240,
+          spawnTimer: 4,
+          wave: 1,
+          toastUntil: 0,
+          toastText: ""
+        });
+        bullets = [];
+        enemies = [];
+        pickups = [];
+        particles = [];
+        generateProps();
+        seedPickups();
+        for (let i = 0; i < 7; i++) spawnEnemy(true);
+        ui.overlay.classList.add("hidden");
+        showToast("レイド開始。コアを回収して北東へ脱出。");
+      }
+
+      function generateProps() {
+        props = [
+          { x: 700, y: 420, w: 440, h: 74, type: "wall" },
+          { x: 1300, y: 940, w: 540, h: 86, type: "wall" },
+          { x: 340, y: 780, w: 110, h: 420, type: "wall" },
+          { x: 1880, y: 410, w: 90, h: 420, type: "wall" },
+          { x: 1970, y: 1230, w: 360, h: 80, type: "wall" },
+          { x: 970, y: 1280, w: 120, h: 260, type: "wall" }
+        ];
+        for (let i = 0; i < 52; i++) {
+          props.push({
+            x: rand(80, world.width - 120),
+            y: rand(80, world.height - 120),
+            w: rand(30, 95),
+            h: rand(22, 80),
+            type: Math.random() > 0.55 ? "crate" : "wreck",
+            rot: rand(-0.5, 0.5)
+          });
         }
-      ];
+      }
 
-      const form = document.querySelector("#report-form");
-      const raidGrid = document.querySelector("#raid-grid");
-      const loadingMessage = document.querySelector("#loading-message");
+      function seedPickups() {
+        const coreSpots = [
+          [560, 260],
+          [1210, 530],
+          [520, 1200],
+          [1720, 1370],
+          [2190, 850],
+          [1510, 250],
+          [870, 940]
+        ];
+        pickups = coreSpots.map(([x, y]) => ({ x, y, r: 18, kind: "core", taken: false }));
+        for (let i = 0; i < 8; i++) {
+          pickups.push({ x: rand(260, 2350), y: rand(240, 1460), r: 15, kind: "ammo", taken: false });
+        }
+        for (let i = 0; i < 5; i++) {
+          pickups.push({ x: rand(260, 2350), y: rand(240, 1460), r: 15, kind: "med", taken: false });
+        }
+      }
 
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const data = new FormData(form);
-        const title = `[RAID] ${data.get("title")}`;
-        const body = [
-          "## レイド報告",
-          `- プレイヤー: ${data.get("player")}`,
-          `- 結果: ${data.get("outcome")}`,
-          `- 人数: ${data.get("party")}`,
-          `- マップ: ${data.get("map") || "未入力"}`,
-          `- 戦利品: ${data.get("loot") || "未入力"}`,
-          `- 画像URL: ${data.get("image") || "Issue画面で添付"}`,
-          "",
-          "## コメント",
-          data.get("comment"),
-          "",
-          "<!-- この形式のまま投稿するとサイト側で読み取りやすくなります。 -->"
-        ].join("\n");
+      function spawnEnemy(edgeOnly = false) {
+        const side = Math.floor(Math.random() * 4);
+        let x = rand(0, world.width);
+        let y = rand(0, world.height);
+        if (edgeOnly || Math.random() > 0.35) {
+          if (side === 0) y = 40;
+          if (side === 1) x = world.width - 40;
+          if (side === 2) y = world.height - 40;
+          if (side === 3) x = 40;
+        }
+        const hunter = Math.random() < Math.min(0.22 + state.wave * 0.03, 0.44);
+        enemies.push({
+          x,
+          y,
+          r: hunter ? 18 : 15,
+          hp: hunter ? 70 : 42,
+          maxHp: hunter ? 70 : 42,
+          speed: hunter ? rand(130, 160) : rand(92, 124),
+          cooldown: rand(0.2, 1.3),
+          type: hunter ? "hunter" : "scout",
+          wobble: rand(0, Math.PI * 2)
+        });
+      }
 
-        const params = new URLSearchParams({ title, body });
-        window.open(`${newIssueUrl}?${params.toString()}`, "_blank", "noopener");
+      function showToast(text) {
+        state.toastText = text;
+        state.toastUntil = performance.now() + 2300;
+        ui.toast.textContent = text;
+        ui.toast.classList.add("show");
+      }
+
+      function tryShoot() {
+        if (!state.running || player.reload > 0 || player.fireDelay > 0 || player.ammo <= 0) return;
+        const target = screenToWorld(mouse);
+        const angle = Math.atan2(target.y - player.y, target.x - player.x);
+        const spread = rand(-0.035, 0.035);
+        bullets.push({
+          x: player.x + Math.cos(angle) * 22,
+          y: player.y + Math.sin(angle) * 22,
+          vx: Math.cos(angle + spread) * 760,
+          vy: Math.sin(angle + spread) * 760,
+          life: 0.74,
+          damage: 28
+        });
+        player.ammo--;
+        player.fireDelay = 0.105;
+        for (let i = 0; i < 3; i++) {
+          particles.push({
+            x: player.x + Math.cos(angle) * 24,
+            y: player.y + Math.sin(angle) * 24,
+            vx: Math.cos(angle + rand(-0.7, 0.7)) * rand(80, 220),
+            vy: Math.sin(angle + rand(-0.7, 0.7)) * rand(80, 220),
+            life: rand(0.15, 0.28),
+            color: "#f4d58b"
+          });
+        }
+      }
+
+      function reload() {
+        if (player.reload > 0 || player.ammo === player.mag || player.reserve <= 0) return;
+        player.reload = 1.15;
+        showToast("リロード中");
+      }
+
+      function finishReload() {
+        const need = player.mag - player.ammo;
+        const loaded = Math.min(need, player.reserve);
+        player.ammo += loaded;
+        player.reserve -= loaded;
+      }
+
+      function screenToWorld(point) {
+        return { x: point.x + camera.x, y: point.y + camera.y };
+      }
+
+      function moveWithCollisions(entity, dx, dy) {
+        entity.x = clamp(entity.x + dx, entity.r, world.width - entity.r);
+        for (const prop of props) {
+          if (prop.type === "wall") resolveRect(entity, prop, "x");
+        }
+        entity.y = clamp(entity.y + dy, entity.r, world.height - entity.r);
+        for (const prop of props) {
+          if (prop.type === "wall") resolveRect(entity, prop, "y");
+        }
+      }
+
+      function resolveRect(circle, rect, axis) {
+        const closestX = clamp(circle.x, rect.x, rect.x + rect.w);
+        const closestY = clamp(circle.y, rect.y, rect.y + rect.h);
+        const dx = circle.x - closestX;
+        const dy = circle.y - closestY;
+        const overlap = circle.r - Math.hypot(dx, dy);
+        if (overlap <= 0) return;
+        if (axis === "x") {
+          circle.x += dx >= 0 ? overlap : -overlap;
+        } else {
+          circle.y += dy >= 0 ? overlap : -overlap;
+        }
+      }
+
+      function damagePlayer(amount) {
+        if (player.shield > 0) {
+          const shieldHit = Math.min(player.shield, amount);
+          player.shield -= shieldHit;
+          amount -= shieldHit;
+        }
+        player.health = clamp(player.health - amount, 0, 100);
+        if (player.health <= 0) endGame(false, "レイダーは回収不能。");
+      }
+
+      function update(dt) {
+        if (!state.running) return;
+        state.time -= dt;
+        if (state.time <= 0) endGame(false, "時間切れ。回収機が離脱しました。");
+
+        player.fireDelay = Math.max(0, player.fireDelay - dt);
+        player.dashHeat = Math.max(0, player.dashHeat - dt * 0.42);
+        if (player.reload > 0) {
+          player.reload -= dt;
+          if (player.reload <= 0) finishReload();
+        }
+        if (player.shield < 100) player.shield = clamp(player.shield + dt * 5.5, 0, 100);
+
+        let mx = 0;
+        let my = 0;
+        if (keys.has("w") || keys.has("arrowup")) my -= 1;
+        if (keys.has("s") || keys.has("arrowdown")) my += 1;
+        if (keys.has("a") || keys.has("arrowleft")) mx -= 1;
+        if (keys.has("d") || keys.has("arrowright")) mx += 1;
+        if (mx || my) {
+          const len = Math.hypot(mx, my);
+          const dash = keys.has("shift") && player.dashHeat < 0.92 ? 1.55 : 1;
+          if (dash > 1) player.dashHeat += dt * 0.5;
+          const speed = player.speed * dash;
+          moveWithCollisions(player, (mx / len) * speed * dt, (my / len) * speed * dt);
+        }
+
+        if ((mouse.down || keys.has(" ")) && player.reload <= 0) tryShoot();
+        if (player.ammo === 0 && player.reserve > 0) reload();
+
+        for (const bullet of bullets) {
+          bullet.x += bullet.vx * dt;
+          bullet.y += bullet.vy * dt;
+          bullet.life -= dt;
+        }
+
+        for (const enemy of enemies) {
+          enemy.wobble += dt * 4;
+          const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+          const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+          const orbit = distance < 180 ? Math.sin(enemy.wobble) * 0.8 : 0;
+          moveWithCollisions(enemy, Math.cos(angle + orbit) * enemy.speed * dt, Math.sin(angle + orbit) * enemy.speed * dt);
+          enemy.cooldown -= dt;
+          if (distance < 48 && enemy.cooldown <= 0) {
+            enemy.cooldown = enemy.type === "hunter" ? 0.56 : 0.82;
+            damagePlayer(enemy.type === "hunter" ? 18 : 12);
+            spark(enemy.x, enemy.y, "#e75f54", 9);
+          }
+        }
+
+        for (const bullet of bullets) {
+          for (const enemy of enemies) {
+            if (bullet.life <= 0 || Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y) > enemy.r + 8) continue;
+            bullet.life = 0;
+            enemy.hp -= bullet.damage;
+            spark(enemy.x, enemy.y, enemy.type === "hunter" ? "#57c6d9" : "#d9b35c", 8);
+            if (enemy.hp <= 0) {
+              player.kills++;
+              spark(enemy.x, enemy.y, "#f3efe4", 18);
+              if (Math.random() < 0.28) pickups.push({ x: enemy.x, y: enemy.y, r: 14, kind: "ammo", taken: false });
+            }
+          }
+        }
+        bullets = bullets.filter((bullet) => bullet.life > 0 && bullet.x > 0 && bullet.y > 0 && bullet.x < world.width && bullet.y < world.height);
+        enemies = enemies.filter((enemy) => enemy.hp > 0);
+
+        for (const item of pickups) {
+          if (item.taken || Math.hypot(item.x - player.x, item.y - player.y) > player.r + item.r + 8) continue;
+          item.taken = true;
+          if (item.kind === "core") {
+            player.cores++;
+            showToast(`アークコア回収: ${player.cores}/5`);
+          }
+          if (item.kind === "ammo") {
+            player.reserve = Math.min(150, player.reserve + 30);
+            showToast("弾薬を補給");
+          }
+          if (item.kind === "med") {
+            player.health = Math.min(100, player.health + 32);
+            showToast("修理キット使用");
+          }
+          spark(item.x, item.y, item.kind === "core" ? "#57c6d9" : "#7bc97d", 14);
+        }
+        pickups = pickups.filter((item) => !item.taken);
+
+        if (player.cores >= 5 && Math.hypot(player.x - extract.x, player.y - extract.y) < extract.r) {
+          endGame(true, "脱出成功。レイド完了。");
+        }
+
+        state.spawnTimer -= dt;
+        if (state.spawnTimer <= 0) {
+          state.wave++;
+          state.spawnTimer = Math.max(2.8, 7.2 - state.wave * 0.3);
+          spawnEnemy(true);
+          if (state.wave % 3 === 0) spawnEnemy(true);
+        }
+
+        for (const particle of particles) {
+          particle.x += particle.vx * dt;
+          particle.y += particle.vy * dt;
+          particle.life -= dt;
+          particle.vx *= 0.9;
+          particle.vy *= 0.9;
+        }
+        particles = particles.filter((particle) => particle.life > 0);
+
+        camera.x = clamp(player.x - window.innerWidth / 2, 0, world.width - window.innerWidth);
+        camera.y = clamp(player.y - window.innerHeight / 2, 0, world.height - window.innerHeight);
+        updateUi();
+      }
+
+      function spark(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+          const angle = rand(0, Math.PI * 2);
+          particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * rand(55, 240),
+            vy: Math.sin(angle) * rand(55, 240),
+            life: rand(0.18, 0.5),
+            color
+          });
+        }
+      }
+
+      function endGame(won, message) {
+        if (state.over) return;
+        state.running = false;
+        state.over = true;
+        ui.overlay.classList.remove("hidden");
+        ui.overlay.querySelector(".kicker").textContent = won ? "EXTRACTION COMPLETE" : "RAID FAILED";
+        ui.overlay.querySelector("h1").textContent = won ? "脱出成功" : "回収失敗";
+        ui.overlay.querySelector("p").textContent = message;
+        ui.startBtn.textContent = "もう一度プレイ";
+        ui.summary.hidden = false;
+        ui.resultCores.textContent = `${player.cores}/5`;
+        ui.resultKills.textContent = player.kills;
+        ui.resultTime.textContent = formatTime(state.time);
+      }
+
+      function updateUi() {
+        ui.timer.textContent = formatTime(state.time);
+        ui.cores.textContent = `${Math.min(player.cores, 5)}/5`;
+        ui.drones.textContent = player.kills;
+        ui.healthText.textContent = Math.ceil(player.health);
+        ui.shieldText.textContent = Math.ceil(player.shield);
+        ui.ammoText.textContent = player.reload > 0 ? "..." : player.ammo;
+        ui.healthBar.style.transform = `scaleX(${player.health / 100})`;
+        ui.shieldBar.style.transform = `scaleX(${player.shield / 100})`;
+        ui.ammoBar.style.transform = `scaleX(${player.ammo / player.mag})`;
+        if (player.cores >= 5) {
+          ui.objective.textContent = "コアは揃いました。北東の青い回収ビーコンへ移動して脱出。";
+        }
+        if (performance.now() > state.toastUntil) ui.toast.classList.remove("show");
+      }
+
+      function formatTime(seconds) {
+        seconds = Math.max(0, Math.ceil(seconds));
+        const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+        const s = (seconds % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+      }
+
+      function draw() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+        ctx.save();
+        ctx.translate(-camera.x, -camera.y);
+        drawWorld();
+        drawExtract();
+        for (const item of pickups) drawPickup(item);
+        for (const prop of props) drawProp(prop);
+        for (const bullet of bullets) drawBullet(bullet);
+        for (const enemy of enemies) drawEnemy(enemy);
+        drawPlayer();
+        for (const particle of particles) drawParticle(particle);
+        ctx.restore();
+        drawVignette(w, h);
+      }
+
+      function drawWorld() {
+        ctx.fillStyle = "#171a17";
+        ctx.fillRect(0, 0, world.width, world.height);
+        ctx.strokeStyle = "rgba(243,239,228,0.035)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < world.width; x += 80) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, world.height);
+          ctx.stroke();
+        }
+        for (let y = 0; y < world.height; y += 80) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(world.width, y);
+          ctx.stroke();
+        }
+        ctx.fillStyle = "rgba(217,179,92,0.05)";
+        for (let i = 0; i < 24; i++) {
+          const x = ((i * 313) % world.width);
+          const y = ((i * 197) % world.height);
+          ctx.fillRect(x, y, 150, 26);
+        }
+      }
+
+      function drawProp(prop) {
+        ctx.save();
+        if (prop.type === "wall") {
+          ctx.fillStyle = "#292d28";
+          ctx.strokeStyle = "rgba(243,239,228,0.12)";
+          ctx.lineWidth = 2;
+          ctx.fillRect(prop.x, prop.y, prop.w, prop.h);
+          ctx.strokeRect(prop.x + 1, prop.y + 1, prop.w - 2, prop.h - 2);
+        } else {
+          ctx.translate(prop.x + prop.w / 2, prop.y + prop.h / 2);
+          ctx.rotate(prop.rot || 0);
+          ctx.fillStyle = prop.type === "crate" ? "#4c4634" : "#303739";
+          ctx.strokeStyle = "rgba(243,239,228,0.1)";
+          ctx.fillRect(-prop.w / 2, -prop.h / 2, prop.w, prop.h);
+          ctx.strokeRect(-prop.w / 2, -prop.h / 2, prop.w, prop.h);
+        }
+        ctx.restore();
+      }
+
+      function drawExtract() {
+        const pulse = 0.75 + Math.sin(performance.now() * 0.004) * 0.25;
+        ctx.save();
+        ctx.translate(extract.x, extract.y);
+        ctx.strokeStyle = `rgba(87,198,217,${0.42 + pulse * 0.24})`;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 0, extract.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = "rgba(87,198,217,0.08)";
+        ctx.beginPath();
+        ctx.arc(0, 0, extract.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#57c6d9";
+        ctx.fillRect(-20, -20, 40, 40);
+        ctx.fillStyle = "#0d0f10";
+        ctx.fillRect(-9, -9, 18, 18);
+        ctx.restore();
+      }
+
+      function drawPickup(item) {
+        const pulse = Math.sin(performance.now() * 0.006 + item.x) * 0.2 + 0.8;
+        ctx.save();
+        ctx.translate(item.x, item.y);
+        ctx.rotate(performance.now() * 0.0016);
+        ctx.fillStyle = item.kind === "core" ? "#57c6d9" : item.kind === "ammo" ? "#d9b35c" : "#7bc97d";
+        ctx.globalAlpha = pulse;
+        if (item.kind === "core") {
+          ctx.beginPath();
+          for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI * 2 * i) / 6;
+            ctx.lineTo(Math.cos(angle) * item.r, Math.sin(angle) * item.r);
+          }
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillRect(-item.r, -item.r, item.r * 2, item.r * 2);
+        }
+        ctx.restore();
+      }
+
+      function drawBullet(bullet) {
+        ctx.strokeStyle = "#f4d58b";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(bullet.x, bullet.y);
+        ctx.lineTo(bullet.x - bullet.vx * 0.025, bullet.y - bullet.vy * 0.025);
+        ctx.stroke();
+      }
+
+      function drawEnemy(enemy) {
+        ctx.save();
+        ctx.translate(enemy.x, enemy.y);
+        ctx.rotate(enemy.wobble * 0.2);
+        ctx.fillStyle = enemy.type === "hunter" ? "#264d55" : "#4a3c22";
+        ctx.strokeStyle = enemy.type === "hunter" ? "#57c6d9" : "#d9b35c";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -enemy.r);
+        ctx.lineTo(enemy.r * 1.15, 0);
+        ctx.lineTo(0, enemy.r);
+        ctx.lineTo(-enemy.r * 1.15, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#e75f54";
+        ctx.fillRect(-enemy.r, -enemy.r - 10, enemy.r * 2 * (enemy.hp / enemy.maxHp), 3);
+        ctx.restore();
+      }
+
+      function drawPlayer() {
+        const target = screenToWorld(mouse);
+        const angle = Math.atan2(target.y - player.y, target.x - player.x);
+        ctx.save();
+        ctx.translate(player.x, player.y);
+        ctx.rotate(angle);
+        ctx.fillStyle = "#e7e0cf";
+        ctx.strokeStyle = "#111";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(24, 0);
+        ctx.lineTo(-14, -15);
+        ctx.lineTo(-8, 0);
+        ctx.lineTo(-14, 15);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#d9b35c";
+        ctx.fillRect(8, -4, 25, 8);
+        ctx.restore();
+        ctx.strokeStyle = "rgba(87,198,217,0.34)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, player.r + 8 + Math.sin(performance.now() * 0.006) * 2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      function drawParticle(particle) {
+        ctx.globalAlpha = clamp(particle.life * 3, 0, 1);
+        ctx.fillStyle = particle.color;
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      function drawVignette(w, h) {
+        const gradient = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.2, w / 2, h / 2, Math.max(w, h) * 0.7);
+        gradient.addColorStop(0, "rgba(0,0,0,0)");
+        gradient.addColorStop(1, "rgba(0,0,0,0.38)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      function loop(now) {
+        const dt = Math.min(0.04, (now - state.last) / 1000 || 0);
+        state.last = now;
+        update(dt);
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener("resize", resize);
+      window.addEventListener("keydown", (event) => {
+        keys.add(event.key.toLowerCase());
+        if (event.key.toLowerCase() === "r") reload();
+        if (event.key === " ") event.preventDefault();
+      });
+      window.addEventListener("keyup", (event) => keys.delete(event.key.toLowerCase()));
+      canvas.addEventListener("mousemove", (event) => {
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+      });
+      canvas.addEventListener("mousedown", () => {
+        mouse.down = true;
+        if (!state.running && ui.overlay.classList.contains("hidden")) resetGame();
+      });
+      window.addEventListener("mouseup", () => {
+        mouse.down = false;
+      });
+      ui.startBtn.addEventListener("click", resetGame);
+      ui.howBtn.addEventListener("click", () => {
+        ui.overlay.querySelector("p").textContent = "WASDまたは矢印で移動、Shiftでダッシュ、マウスで照準、クリックまたはSpaceで射撃、Rでリロード。青いコアを5つ集めたら北東のビーコンへ。";
       });
 
-      function escapeHtml(value) {
-        return String(value)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-
-      function getField(body, label) {
-        const match = body.match(new RegExp(`- ${label}:\\s*(.+)`));
-        return match ? match[1].trim() : "";
-      }
-
-      function getImage(body) {
-        const imageUrl = getField(body, "画像URL");
-        if (imageUrl && imageUrl.startsWith("http")) {
-          return imageUrl;
-        }
-
-        const markdownImage = body.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/);
-        if (markdownImage) {
-          return markdownImage[1];
-        }
-
-        return "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80";
-      }
-
-      function getComment(body) {
-        const comment = body.split("## コメント")[1];
-        if (!comment) {
-          return body.slice(0, 180);
-        }
-
-        return comment
-          .replace(/<!--([\s\S]*?)-->/g, "")
-          .trim()
-          .slice(0, 220);
-      }
-
-      function reportFromIssue(issue) {
-        const body = issue.body || "";
-        return {
-          player: getField(body, "プレイヤー") || issue.user.login,
-          outcome: getField(body, "結果") || "結果未入力",
-          party: getField(body, "人数") || "人数未入力",
-          map: getField(body, "マップ") || "場所未入力",
-          title: issue.title.replace(/^\[RAID\]\s*/i, ""),
-          comment: getComment(body),
-          loot: (getField(body, "戦利品") || "戦利品未入力").split(",").map((item) => item.trim()).filter(Boolean),
-          image: getImage(body),
-          url: issue.html_url
-        };
-      }
-
-      function renderReports(reports) {
-        raidGrid.innerHTML = reports.map((report) => {
-          const isSuccess = report.outcome.includes("帰還成功");
-          const outcomeClass = isSuccess ? "success" : "danger";
-          const lootItems = report.loot.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
-          const link = report.url && report.url !== "#" ? `<a class="button ghost" href="${escapeHtml(report.url)}" target="_blank" rel="noopener">投稿元を見る</a>` : "";
-
-          return `
-            <article class="raid-card">
-              <img src="${escapeHtml(report.image)}" alt="${escapeHtml(report.title)}のスクリーンショット" loading="lazy">
-              <div class="raid-body">
-                <div class="raid-meta">
-                  <span class="tag ${outcomeClass}">${escapeHtml(report.outcome)}</span>
-                  <span class="tag">${escapeHtml(report.party)}</span>
-                  <span class="tag">${escapeHtml(report.map)}</span>
-                </div>
-                <h3>${escapeHtml(report.title)}</h3>
-                <p>${escapeHtml(report.comment)}</p>
-                <ul class="loot-list" aria-label="戦利品">${lootItems}</ul>
-                <p>投稿者: ${escapeHtml(report.player)}</p>
-                ${link}
-              </div>
-            </article>
-          `;
-        }).join("");
-
-        updateRecords(reports);
-      }
-
-      function updateRecords(reports) {
-        const total = reports.length;
-        const success = reports.filter((report) => report.outcome.includes("帰還成功")).length;
-        const down = total - success;
-        const rate = total ? Math.round((success / total) * 100) : 0;
-
-        document.querySelector("#total-count").textContent = total;
-        document.querySelector("#success-count").textContent = success;
-        document.querySelector("#down-count").textContent = down;
-        document.querySelector("#success-rate").textContent = `${rate}%`;
-      }
-
-      async function loadReports() {
-        renderReports(sampleReports);
-
-        try {
-          const response = await fetch(issueListUrl, {
-            headers: { Accept: "application/vnd.github+json" }
-          });
-
-          if (!response.ok) {
-            throw new Error("GitHub Issuesを読み込めませんでした");
-          }
-
-          const issues = await response.json();
-          const communityReports = issues
-            .filter((issue) => !issue.pull_request)
-            .filter((issue) => /^\[RAID\]/i.test(issue.title))
-            .map(reportFromIssue);
-
-          if (communityReports.length > 0) {
-            renderReports([...communityReports, ...sampleReports]);
-            loadingMessage.textContent = `${communityReports.length}件の投稿をGitHub Issuesから読み込みました。`;
-          } else {
-            loadingMessage.textContent = "まだ公開投稿はありません。最初のレイド報告を投稿してみてください。";
-          }
-        } catch (error) {
-          loadingMessage.textContent = "GitHub Issuesの読み込みに失敗したため、サンプル投稿を表示しています。";
-        }
-      }
-
-      loadReports();
+      resize();
+      generateProps();
+      seedPickups();
+      updateUi();
+      requestAnimationFrame((now) => {
+        state.last = now;
+        loop(now);
+      });
     </script>
   </body>
 </html>
