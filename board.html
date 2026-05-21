@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ARC Raiders レイドボード</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10120f;
+        --panel: #1b1d18;
+        --panel-strong: #24271f;
+        --text: #f1eee4;
+        --muted: #b9b19f;
+        --line: #3b3d33;
+        --accent: #e1b957;
+        --danger: #e36d56;
+        --success: #76c989;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 12% 0%, rgba(225, 185, 87, 0.18), transparent 28rem),
+          radial-gradient(circle at 100% 14%, rgba(118, 201, 137, 0.11), transparent 24rem),
+          linear-gradient(145deg, #10120f 0%, #191b15 48%, #0f110e 100%);
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      input,
+      select,
+      textarea,
+      button {
+        font: inherit;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(241, 238, 228, 0.12);
+        background: rgba(16, 18, 15, 0.9);
+        backdrop-filter: blur(14px);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 16px 24px;
+      }
+
+      .brand {
+        display: grid;
+        text-decoration: none;
+      }
+
+      .brand strong {
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+      }
+
+      .brand span {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 18px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .hero {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 74px 24px 42px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+        align-items: center;
+        gap: 40px;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--accent);
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.08;
+      }
+
+      h1 {
+        max-width: 760px;
+        font-size: clamp(2.35rem, 7vw, 5.5rem);
+        line-height: 0.95;
+      }
+
+      h2 {
+        font-size: clamp(1.6rem, 4vw, 2.6rem);
+      }
+
+      .lead {
+        max-width: 640px;
+        margin: 24px 0 0;
+        color: var(--muted);
+        font-size: clamp(1rem, 2vw, 1.2rem);
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .button,
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 18px;
+        border: 1px solid rgba(241, 238, 228, 0.16);
+        border-radius: 6px;
+        background: var(--accent);
+        color: #16130b;
+        font-weight: 800;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .button.secondary {
+        background: transparent;
+        color: var(--text);
+      }
+
+      .button.ghost {
+        background: rgba(241, 238, 228, 0.08);
+        color: var(--text);
+      }
+
+      .hero-photo,
+      .submit-panel,
+      .raid-card,
+      .record-panel,
+      .notice {
+        border: 1px solid rgba(241, 238, 228, 0.12);
+        border-radius: 8px;
+        background: rgba(27, 29, 24, 0.92);
+      }
+
+      .hero-photo {
+        overflow: hidden;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+      }
+
+      .hero-photo img {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        filter: saturate(0.92) contrast(1.08);
+      }
+
+      .hero-caption {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 16px;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 24px 76px;
+      }
+
+      section + section {
+        margin-top: 64px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 18px;
+      }
+
+      .section-head p {
+        max-width: 470px;
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .submit-panel {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+        gap: 24px;
+        padding: 22px;
+      }
+
+      .submit-copy p {
+        margin: 14px 0 0;
+        color: var(--muted);
+      }
+
+      .submit-copy ul {
+        display: grid;
+        gap: 10px;
+        margin: 22px 0 0;
+        padding: 0;
+        list-style: none;
+        color: var(--muted);
+      }
+
+      .submit-copy li {
+        padding-left: 16px;
+        border-left: 3px solid var(--accent);
+      }
+
+      .report-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field.full {
+        grid-column: 1 / -1;
+      }
+
+      label {
+        color: #ded7c8;
+        font-size: 0.86rem;
+        font-weight: 800;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid rgba(241, 238, 228, 0.14);
+        border-radius: 6px;
+        background: rgba(16, 18, 15, 0.72);
+        color: var(--text);
+      }
+
+      input,
+      select {
+        min-height: 42px;
+        padding: 0 12px;
+      }
+
+      textarea {
+        min-height: 118px;
+        resize: vertical;
+        padding: 10px 12px;
+      }
+
+      .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        grid-column: 1 / -1;
+      }
+
+      .form-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .notice {
+        margin-top: 16px;
+        padding: 16px;
+        color: var(--muted);
+        background: rgba(225, 185, 87, 0.08);
+      }
+
+      .raid-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .raid-card {
+        overflow: hidden;
+      }
+
+      .raid-card img {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        background: var(--panel-strong);
+      }
+
+      .raid-body {
+        display: grid;
+        gap: 14px;
+        padding: 16px;
+      }
+
+      .raid-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        padding: 0 9px;
+        border: 1px solid rgba(241, 238, 228, 0.12);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 800;
+      }
+
+      .tag.success {
+        border-color: rgba(118, 201, 137, 0.35);
+        color: var(--success);
+      }
+
+      .tag.danger {
+        border-color: rgba(227, 109, 86, 0.35);
+        color: var(--danger);
+      }
+
+      .raid-card h3 {
+        font-size: 1.18rem;
+      }
+
+      .raid-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .loot-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .loot-list li {
+        padding: 6px 9px;
+        border-radius: 4px;
+        background: var(--panel-strong);
+        color: #ded7c8;
+        font-size: 0.82rem;
+      }
+
+      .record-panel {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        padding: 18px;
+        background: rgba(36, 39, 31, 0.72);
+      }
+
+      .record-item {
+        padding: 14px;
+        border-left: 3px solid var(--accent);
+        background: rgba(16, 18, 15, 0.46);
+      }
+
+      .record-item strong {
+        display: block;
+        font-size: 1.7rem;
+        line-height: 1;
+      }
+
+      .record-item span {
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      .empty {
+        grid-column: 1 / -1;
+        padding: 28px;
+        border: 1px dashed rgba(241, 238, 228, 0.2);
+        border-radius: 8px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 900px) {
+        .hero-grid,
+        .submit-panel,
+        .raid-grid,
+        .record-panel {
+          grid-template-columns: 1fr;
+        }
+
+        .section-head {
+          align-items: start;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .nav {
+          align-items: start;
+          flex-direction: column;
+        }
+
+        .nav-links {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .hero {
+          padding-top: 48px;
+        }
+
+        .hero-actions,
+        .form-actions {
+          flex-direction: column;
+        }
+
+        .button,
+        button {
+          width: 100%;
+        }
+
+        .report-form {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="メインナビゲーション">
+        <a class="brand" href="#">
+          <strong>ARC Raiders レイドボード</strong>
+          <span>Community Raid Reports</span>
+        </a>
+        <div class="nav-links">
+          <a href="#submit">投稿する</a>
+          <a href="#reports">レイド報告</a>
+          <a href="#records">戦績</a>
+        </div>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Loot or Lost</p>
+          <h1>みんなのレイド結果を、写真と一緒に集める。</h1>
+          <p class="lead">
+            ARC Raidersで帰還できた回も、戦利品を抱えたまま倒れた回も、プレイヤー同士で気軽に共有するためのレイド報告サイトです。
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="#submit">レイドを報告する</a>
+            <a class="button secondary" href="#reports">投稿を見る</a>
+          </div>
+        </div>
+        <figure class="hero-photo">
+          <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80" alt="暗い部屋でゲームをプレイしているデスク環境">
+          <figcaption class="hero-caption">
+            <span>Community Board</span>
+            <span>GitHub Issues連携</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <main>
+      <section id="submit" aria-labelledby="submit-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Submit</p>
+            <h2 id="submit-title">レイド結果を投稿する</h2>
+          </div>
+          <p>フォームを埋めると、GitHubの投稿画面が開きます。画像はURLを入れるか、開いたIssue画面にドラッグして添付できます。</p>
+        </div>
+
+        <div class="submit-panel">
+          <div class="submit-copy">
+            <h3>投稿の流れ</h3>
+            <p>GitHub Pagesだけでは直接データを保存できないため、GitHub Issuesを投稿箱として使います。</p>
+            <ul>
+              <li>このフォームでレイド内容を入力</li>
+              <li>GitHubのIssue作成画面で内容を確認</li>
+              <li>投稿されたIssueをサイトが読み込んで一覧に表示</li>
+            </ul>
+          </div>
+
+          <form class="report-form" id="report-form">
+            <div class="field">
+              <label for="player">プレイヤー名</label>
+              <input id="player" name="player" placeholder="例: kabutomush1" required>
+            </div>
+            <div class="field">
+              <label for="outcome">結果</label>
+              <select id="outcome" name="outcome" required>
+                <option value="帰還成功">帰還成功</option>
+                <option value="レイド先で倒れた">レイド先で倒れた</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="party">人数</label>
+              <select id="party" name="party">
+                <option value="ソロ">ソロ</option>
+                <option value="デュオ">デュオ</option>
+                <option value="スクワッド">スクワッド</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="map">マップ・場所</label>
+              <input id="map" name="map" placeholder="例: Dam Battlegrounds">
+            </div>
+            <div class="field full">
+              <label for="title">レイドのタイトル</label>
+              <input id="title" name="title" placeholder="例: 欲張らずに帰還できた回" required>
+            </div>
+            <div class="field full">
+              <label for="loot">戦利品</label>
+              <input id="loot" name="loot" placeholder="例: 武器パーツ, 医療品, レア素材">
+            </div>
+            <div class="field full">
+              <label for="image">画像URL</label>
+              <input id="image" name="image" type="url" placeholder="https://example.com/raid-screenshot.jpg">
+            </div>
+            <div class="field full">
+              <label for="comment">コメント</label>
+              <textarea id="comment" name="comment" placeholder="何が起きたか、良かった判断、反省点など" required></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit">GitHubで投稿する</button>
+              <p class="form-note">投稿にはGitHubアカウントが必要です。</p>
+            </div>
+          </form>
+        </div>
+
+        <div class="notice">
+          公開サイトにすぐ反映したい場合は、Issueのタイトルを <strong>[RAID]</strong> で始めてください。このフォームから開けば自動で入ります。
+        </div>
+      </section>
+
+      <section id="reports" aria-labelledby="reports-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Raid Reports</p>
+            <h2 id="reports-title">みんなのレイド報告</h2>
+          </div>
+          <p id="loading-message">GitHub Issuesから投稿を読み込み中です。</p>
+        </div>
+
+        <div class="raid-grid" id="raid-grid"></div>
+      </section>
+
+      <section id="records" class="record-panel" aria-label="レイド戦績">
+        <div class="record-item">
+          <strong id="total-count">0</strong>
+          <span>表示中の投稿</span>
+        </div>
+        <div class="record-item">
+          <strong id="success-count">0</strong>
+          <span>帰還成功</span>
+        </div>
+        <div class="record-item">
+          <strong id="down-count">0</strong>
+          <span>倒れた回</span>
+        </div>
+        <div class="record-item">
+          <strong id="success-rate">0%</strong>
+          <span>帰還率</span>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const repoOwner = "kabutomush1";
+      const repoName = "my-site1";
+      const issueListUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/issues?state=open&per_page=50`;
+      const newIssueUrl = `https://github.com/${repoOwner}/${repoName}/issues/new`;
+
+      const sampleReports = [
+        {
+          player: "情報屋",
+          outcome: "帰還成功",
+          party: "ソロ",
+          map: "探索ルート",
+          title: "欲張らずに撤収した回",
+          comment: "良い物資を拾ったあと、戦闘音を避けて早めに帰還。判断はかなり良かった。",
+          loot: ["武器パーツ", "医療品", "クラフト素材"],
+          image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=900&q=80",
+          url: "#"
+        },
+        {
+          player: "投稿サンプル",
+          outcome: "レイド先で倒れた",
+          party: "デュオ",
+          map: "交戦エリア",
+          title: "音に釣られて突っ込みすぎた回",
+          comment: "戦利品は悪くなかったけれど、帰還前に欲を出して負け。次は退路を先に見る。",
+          loot: ["レア素材", "弾薬", "回復キット"],
+          image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=900&q=80",
+          url: "#"
+        },
+        {
+          player: "チームログ",
+          outcome: "帰還成功",
+          party: "スクワッド",
+          map: "回収地点",
+          title: "味方との連携が噛み合った回",
+          comment: "索敵、回収、撤収の流れがきれいだった。写真を残したい場面が多いレイド。",
+          loot: ["高価値アイテム", "装備品", "設計素材"],
+          image: "https://images.unsplash.com/photo-1605901309584-818e25960a8f?auto=format&fit=crop&w=900&q=80",
+          url: "#"
+        }
+      ];
+
+      const form = document.querySelector("#report-form");
+      const raidGrid = document.querySelector("#raid-grid");
+      const loadingMessage = document.querySelector("#loading-message");
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        const title = `[RAID] ${data.get("title")}`;
+        const body = [
+          "## レイド報告",
+          `- プレイヤー: ${data.get("player")}`,
+          `- 結果: ${data.get("outcome")}`,
+          `- 人数: ${data.get("party")}`,
+          `- マップ: ${data.get("map") || "未入力"}`,
+          `- 戦利品: ${data.get("loot") || "未入力"}`,
+          `- 画像URL: ${data.get("image") || "Issue画面で添付"}`,
+          "",
+          "## コメント",
+          data.get("comment"),
+          "",
+          "<!-- この形式のまま投稿するとサイト側で読み取りやすくなります。 -->"
+        ].join("\n");
+
+        const params = new URLSearchParams({ title, body });
+        window.open(`${newIssueUrl}?${params.toString()}`, "_blank", "noopener");
+      });
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function getField(body, label) {
+        const match = body.match(new RegExp(`- ${label}:\\s*(.+)`));
+        return match ? match[1].trim() : "";
+      }
+
+      function getImage(body) {
+        const imageUrl = getField(body, "画像URL");
+        if (imageUrl && imageUrl.startsWith("http")) {
+          return imageUrl;
+        }
+
+        const markdownImage = body.match(/!\[[^\]]*\]\((https?:\/\/[^)]+)\)/);
+        if (markdownImage) {
+          return markdownImage[1];
+        }
+
+        return "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=900&q=80";
+      }
+
+      function getComment(body) {
+        const comment = body.split("## コメント")[1];
+        if (!comment) {
+          return body.slice(0, 180);
+        }
+
+        return comment
+          .replace(/<!--([\s\S]*?)-->/g, "")
+          .trim()
+          .slice(0, 220);
+      }
+
+      function reportFromIssue(issue) {
+        const body = issue.body || "";
+        return {
+          player: getField(body, "プレイヤー") || issue.user.login,
+          outcome: getField(body, "結果") || "結果未入力",
+          party: getField(body, "人数") || "人数未入力",
+          map: getField(body, "マップ") || "場所未入力",
+          title: issue.title.replace(/^\[RAID\]\s*/i, ""),
+          comment: getComment(body),
+          loot: (getField(body, "戦利品") || "戦利品未入力").split(",").map((item) => item.trim()).filter(Boolean),
+          image: getImage(body),
+          url: issue.html_url
+        };
+      }
+
+      function renderReports(reports) {
+        raidGrid.innerHTML = reports.map((report) => {
+          const isSuccess = report.outcome.includes("帰還成功");
+          const outcomeClass = isSuccess ? "success" : "danger";
+          const lootItems = report.loot.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+          const link = report.url && report.url !== "#" ? `<a class="button ghost" href="${escapeHtml(report.url)}" target="_blank" rel="noopener">投稿元を見る</a>` : "";
+
+          return `
+            <article class="raid-card">
+              <img src="${escapeHtml(report.image)}" alt="${escapeHtml(report.title)}のスクリーンショット" loading="lazy">
+              <div class="raid-body">
+                <div class="raid-meta">
+                  <span class="tag ${outcomeClass}">${escapeHtml(report.outcome)}</span>
+                  <span class="tag">${escapeHtml(report.party)}</span>
+                  <span class="tag">${escapeHtml(report.map)}</span>
+                </div>
+                <h3>${escapeHtml(report.title)}</h3>
+                <p>${escapeHtml(report.comment)}</p>
+                <ul class="loot-list" aria-label="戦利品">${lootItems}</ul>
+                <p>投稿者: ${escapeHtml(report.player)}</p>
+                ${link}
+              </div>
+            </article>
+          `;
+        }).join("");
+
+        updateRecords(reports);
+      }
+
+      function updateRecords(reports) {
+        const total = reports.length;
+        const success = reports.filter((report) => report.outcome.includes("帰還成功")).length;
+        const down = total - success;
+        const rate = total ? Math.round((success / total) * 100) : 0;
+
+        document.querySelector("#total-count").textContent = total;
+        document.querySelector("#success-count").textContent = success;
+        document.querySelector("#down-count").textContent = down;
+        document.querySelector("#success-rate").textContent = `${rate}%`;
+      }
+
+      async function loadReports() {
+        renderReports(sampleReports);
+
+        try {
+          const response = await fetch(issueListUrl, {
+            headers: { Accept: "application/vnd.github+json" }
+          });
+
+          if (!response.ok) {
+            throw new Error("GitHub Issuesを読み込めませんでした");
+          }
+
+          const issues = await response.json();
+          const communityReports = issues
+            .filter((issue) => !issue.pull_request)
+            .filter((issue) => /^\[RAID\]/i.test(issue.title))
+            .map(reportFromIssue);
+
+          if (communityReports.length > 0) {
+            renderReports([...communityReports, ...sampleReports]);
+            loadingMessage.textContent = `${communityReports.length}件の投稿をGitHub Issuesから読み込みました。`;
+          } else {
+            loadingMessage.textContent = "まだ公開投稿はありません。最初のレイド報告を投稿してみてください。";
+          }
+        } catch (error) {
+          loadingMessage.textContent = "GitHub Issuesの読み込みに失敗したため、サンプル投稿を表示しています。";
+        }
+      }
+
+      loadReports();
+    </script>
+  </body>
+</html>
